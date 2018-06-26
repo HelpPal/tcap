@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load assets %}
+{% load tcapptags %}
+
+{% block content %}
+<div ng-app="tcappApp" style="margin-bottom: 25px;" ng-cloak>
+    <div ng-controller="tcappCtrl">
+        {% block tcapp_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block bodyscripts %}
+{% assets "js_angular" %}
+<script type="text/javascript" src="{{ASSET_URL}}"></script>
+{% endassets %}
+{% assets "js_tcapp" %}
+<script type="text/javascript" src="{{ASSET_URL}}"></script>
+{% endassets %}
+<script type="text/javascript">
+/* Implementation Note: Not including a list of dependent modules
+   (2nd parameter to `module`) "re-opens" the module for additional
+   configuration. */
+var app = angular.module('tcappApp');
+/* Add the CSRF Token: */
+app.config(['$interpolateProvider', '$httpProvider',
+           function($interpolateProvider, $httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{csrf_token|escapejs}}';
+    /* Makes it easier to separate between django and angularjs templates */
+    $interpolateProvider.startSymbol('[[');
+    $interpolateProvider.endSymbol(']]');
+}]);
+app.constant('settings', {
+    itemsPerPage: 25, /*XXX match settings.py:REST_FRAMEWORK[PAGE_SIZE]*/
+    lihtcProperty: "{% if lihtc_property %}{{lihtc_property}}{% endif %}",
+    fields: {}, limits: {},
+    sources: {% if sources %}{{sources|safe}}{% else %}[]{% endif %},
+    urls: {
+      {% if urls and urls.add_source %}
+        add_source: "{{urls.add_source|safe}}",
+      {% endif %}
+      {% if urls and urls.api_application_resident %}
+        api_application_resident: "{{urls.api_application_resident|safe}}",
+      {% endif %}
+      {% if urls and urls.application and urls.application.application_detail %}
+        application: {application_detail: "{{urls.application.application_detail|safe}}"},
+      {% endif %}
+      {% if urls and urls.edit and urls.edit.media_upload %}
+        api_credentials: "{{urls.edit.media_upload}}",
+      {% endif %}
+      {% if urls and urls.api_document_upload %}
+        api_document_upload: "{{urls.api_document_upload}}",
+      {% endif %}
+    },
+    application: {% if application_js %}{{application_js|safe}}{% else %}{}{% endif %},
+});
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "tcapp/application_base.html" %}
+
+{% block application_content %}
+{% include "tcapp/_calculation.html" %}
+<div class="col-sm-12">
+    <form method="POST" action=".">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-xs-6 text-left">
+                <button class="btn btn-default" type="submit" name="status" value="archived">Archive as above income</button>
+            </div>
+            <div class="col-xs-6 text-right">
+                <button id="move-to-verification" class="btn btn-primary" type="submit" name="status" value="verification">Move to verification&raquo;</button>
+            </div>
+        </div>
+    </form>
+    <div class="disclaimers">
+        <h3>Disclaimers</h3>
+        <p>
+We strongly recommend that you check with the applicable state housing agency
+to verify that the state agrees with the numbers provided. The numbers round
+down to the nearest $1. TEACAPP, LLC provides no assurance of the accuracy
+of the particular results you may obtain from presented Income Limits or maximum
+rents; which is designed only to be a quick reference tool and is no substitute
+for professional tax and accounting advice. IRS guidelines and actual HUD
+amounts should be used for any final decisions.
+        </p>
+        <p>
+Be sure to read the
+<a href="{{'/legal/terms-of-use/'|site_prefixed}}">Terms of Service</a>,
+as they cover the terms and conditions that apply to your use of this website
+(the "Website," or "Site"). TEACAPP, LLC ("TEACAPP") may change the Terms
+of Service from time to time. By continuing to use the Site following
+such modifications, you agree to be bound by such modifications
+to the Terms of Service.
+        </p>
+    </div>
+</div>
+{% endblock %}

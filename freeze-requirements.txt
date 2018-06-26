@@ -1,0 +1,2 @@
+# html5lib (0.999999999) is incompatible with xhtml2pdf (0.0.6)
+html5lib==0.999

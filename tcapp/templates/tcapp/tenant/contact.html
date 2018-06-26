@@ -1,0 +1,49 @@
+{% extends "tcapp/tenant/base.html" %}
+{% load assets %}
+{% load crispy_forms_tags %}
+
+{% block tenant_certification %}
+<div class="col-sm-offset-2 col-sm-8">
+    <h1 class="text-center"><i class="fa fa-user"></i> Contact Information</h1>
+    <form ng-submit="completeApplication('{% url 'api_application' application.lihtc_property application %}', 'PUT')">
+        {% crispy form %}
+        <fieldset>
+            <legend>Housing History</legend>
+            <div class="row text-left" ng-repeat="pastAddress in activeApplicant.past_addresses">
+                <div class="text-right">
+                    <button class="btn btn-trash" ng-click="removeAtIndex($event, activeApplicant.past_addresses, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                </div>
+                <div class="col-sm-3">
+                    <div>
+                        {% include "tcapp/_angular_date_field.html" with label="From" field="pastAddress.starts_at" %}
+                    </div>
+                    <div>
+                        {% include "tcapp/_angular_date_field.html" with label="To" field="pastAddress.ends_at" %}
+                    </div>
+                </div>
+                <div class="col-sm-9">
+                    {% include "tcapp/_address_js.html" with address="pastAddress" %}
+                    {% if is_manager %}
+                    <div class="col-sm-offset-8 col-sm-4" style="background-color:#bbb;">
+                        <label class="control-label">Monthly Rent</label>
+                        <div class="input-group">
+                            <span class="input-group-addon">$</span>
+                            <input class="form-control" name="monthly-rent-$index" type="number" min="0" step="any" placeholder="amount" ng-model="pastAddress.monthly_rent"></input>
+                        </div>
+                        <span class="help-block"></span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-default btn-sm" ng-click="addPastAddress(activeApplicant.past_addresses, $event)"><i class="fa fa-plus"></i> Add an address</button>
+                </div>
+            </div>
+        </fieldset>
+        <div class="form-actions text-center" style="margin-top:25px;">
+            <button type="submit" class="btn btn-primary">Next &raquo;</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

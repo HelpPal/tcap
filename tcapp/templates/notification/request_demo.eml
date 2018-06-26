@@ -1,0 +1,26 @@
+{% extends "notification/base.eml" %}
+
+{% block subject %}
+Request Demo for {{project.tcac_number}}
+{% endblock %}
+
+{% block plain_content %}
+{{body}}
+
+email: {{email}}
+phone: {{phone}}
+{% endblock %}
+
+{% block html_content %}
+<div>
+  <pre>
+{{body}}
+  </pre>
+  <p>
+email: {{email}}
+  </p>
+  <p>
+phone: {{phone}}
+  </p>
+</div>
+{% endblock %}

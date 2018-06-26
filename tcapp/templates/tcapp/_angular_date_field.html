@@ -1,0 +1,20 @@
+{% comment %}
+``field`` The AngularJS model.
+  ``field.val`` Value of the field
+  ``field.opened`` Claendar is opened.
+  ``field.errors`` errors in the date input.
+``label`` Label for the field.
+``required`` The field is required.
+{% endcomment %}
+
+<div class="form-group{% if field.errors %} has-error{% endif %}">
+    <label class="control-label{% if required %} requiredField{% endif %}">
+        {{label|safe}}{% if required %}<span class="asteriskField">*</span>{% endif %}
+    </label>
+    <p class="input-group">
+        <input type="text" class="datetimeinput form-control" uib-datepicker-popup="[[format]]" ng-model="{{field}}.val" is-open="{{field}}.opened" datepicker-options="dateOptions" {% if required %}ng-required="true"{% endif %} placeholder="MM-DD-YYYY" close-text="Close" />
+        <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="open($event, {{field}})"><i class="fa fa-calendar"></i></button>
+        </span>
+    </p>
+</div>

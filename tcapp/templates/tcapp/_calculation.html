@@ -1,0 +1,147 @@
+<div class="col-sm-12">
+    <h1 class="text-center">
+        <i class="fa fa-home"></i> Household Income Estimate
+    </h1>
+    <div>
+        <h2>1. Income</h2>
+        <table class="table">
+            <tr>
+                <th colspan="5"></th>
+                <th class="text-right">Annualized</th>
+            </tr>
+            {% for app_tenant in application.tenants %}
+            {% with tenant=app_tenant.resident %}
+            <tr>
+                <th colspan="6">{{tenant.printable_name}}</th>
+            </tr>
+            {% if tenant.has_no_income %}
+            <tr>
+                <td>No income reported.</td>
+            </tr>
+            {% else %}
+            {% for key, values in tenant.by_questions.items %}
+            {% if values %}
+            {% for source, verifications in values.items  %}
+            {% with verifications|greater_of_annualize_income as greater_of %}
+            <tr>
+                <td colspan="5">{{key.title}} {{source.printable_name}}</td>
+                <td class="text-right">
+                    {% if manages_property %}
+                    <a href="{{app_tenant.income_verification_url}}">{{greater_of|humanize_money}}</a>
+                    {% else %}
+                    {{greater_of|humanize_money}}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            {% endfor %}
+            <tr>
+                <th colspan="5">Total</th>
+                <th class="text-right">{{application.total_income|humanize_money}}</th>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <h2>2. Assets</h2>
+        {% if application.has_no_assets %}
+        <table class="table">
+            <tr>
+                <td>No assets were reported.</td>
+            </tr>
+        </table>
+        {% else %}
+        <table class="table">
+            <tr>
+                <th colspan="4"></th>
+                <th class="text-right">Cash Value</th>
+                <th class="text-right">Annual Income</th>
+            </tr>
+            {% for tenant in application.tenants %}
+            {% for asset in tenant.resident.get_greater_of_assets %}
+            <tr>
+                <td colspan="4">{{asset.question.title}}</td>
+                <td class="text-right">{{asset.amount|humanize_money}}</td>
+                <td class="text-right">{{asset.annual_income|humanize_money}}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            <tr>
+                <th colspan="4">Total</th>
+                <th class="text-right">{{application.cash_value_of_assets|humanize_money}}</th>
+                <th class="text-right">{{application.annual_income_from_assets|humanize_money}}</th>
+            </tr>
+            <tr>
+                <th colspan="4"> Imputed Income</th>
+                <th></th>
+                <th class="text-right">
+                    {% if application.imputed_income_from_assets %}
+                    {{application.imputed_income_from_assets|humanize_money}}
+                    {% else %}
+                    Not applicable
+                    {% endif %}
+                </th>
+            </tr>
+        </table>
+        {% endif %}
+    </div>
+    <div>
+        <h2>3. Income Limit</h2>
+        {% with income_limit_50=application|income_limit:50 income_limit_60=application|income_limit:60 %}
+        <table class="table">
+            {% if application.children_residents|length > 0 %}
+            <tr><td colspan="6"><em>Dependent children also listed on application:
+            {% for app_child in application.children_residents %}
+                {% if not forloop.first %}
+                ,
+                {% endif %}
+                {{app_child.printable_name}}
+            {% endfor %}
+            </em></td></tr>
+            {% endif %}
+            <tr>
+                <td colspan="5">Estimated household income</td>
+                {# because bootstrap would override above-income/below-income classes #}
+                <td id="total-annual-income" class="text-right" style="{% if application.total_annual_income > income_limit_60 %}border: 2px red solid;{% else %}border: 2px black solid;{% endif %}">{{application.total_annual_income|humanize_money}}</td>
+            </tr>
+            <tr>
+                <td colspan="5">Current Federal LIHTC Income Limit per Family Size of {{application.family_size}} in {{application.lihtc_property.county.name}} at 60% AMI</td>
+                <td class="text-right">{{income_limit_60|humanize_money}}
+            </tr>
+            <tr>
+                <td colspan="5">Current Federal LIHTC Income Limit per Family Size of {{application.family_size}} in {{application.lihtc_property.county.name}} at 50% AMI</td>
+                <td class="text-right">{{income_limit_50|humanize_money}}</td>
+            </tr>
+        </table>
+        {% endwith %}
+    </div>
+    <div>
+        <h2>4. Contact Information</h2>
+        <table class="table">
+            <tr>
+                <th></th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th></th>
+            </tr>
+            {% for app_tenant in application.tenants %}
+            {% with tenant=app_tenant.resident %}
+            <tr class="vcard">
+                <td>{{tenant.printable_name}}</td>
+                <td class="tel">{{tenant.phone}}</td>
+                <td class="email">{{tenant.email}}</td>
+                <td>
+                    {% if manages_property %}
+                    <a href="{{app_tenant.ticq_download_url}}" target="_blank"><i class="fa fa-print"></i> TIC Questionnaire</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+        </table>
+    </div>
+</div>

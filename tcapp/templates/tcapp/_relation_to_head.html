@@ -1,0 +1,18 @@
+<select class="select form-control" name="{% if name %}{{name}}{% else %}{{model|slugify}}{% endif %}" ng-model="{{model}}">
+    <option value="" disabled selected>Please choose one ...</option>
+    {% if show_tenant_choices %}
+    <option value="Adult Co-Tenant">Adult Co-Tenant</option>
+    <option value="Live-in Caretaker">Live-in Caretaker</option>
+    <option value="Spouse">Spouse</option>
+    <option value="Foster adult">Foster adult</option>
+    <option value="Other Family Member">Other Family Member</option>
+    <option value="None of the above">None of the above</option>
+    {% endif %}
+    {% if show_child_choices %}
+    <option value="Child">Child</option>
+    <option value="Foster child">Foster child</option>
+    <option value="Unborn child">Unborn child</option>
+    <option value="Anticipated adoption or foster">Anticipated adoption or foster</option>
+    <option value="None of the above">None of the above</option>
+    {% endif %}
+</select>

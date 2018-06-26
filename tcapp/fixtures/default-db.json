@@ -1,0 +1,638 @@
+[
+{ "fields": {
+    "category": 1,
+    "slug": "selfemployed",
+    "title": "Self-Employed",
+    "text": "I am self employed (List nature of self employment)",
+    "rank": 1,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 1
+},
+{ "fields": {
+    "category": 1,
+    "slug": "employee",
+    "title": "W2 Employee",
+    "text": "I have a job and receive wages, salary, overtime pay, commissions, fees, tips, bonuses, and/or other compensation. List the businesses and/or companies that pay you:",
+    "rank": 2,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 2
+},
+{ "fields": {
+    "category": 1,
+    "slug": "others",
+    "title": "Other",
+    "text": "I receive cash contributions of gifts including rent or utility payments, on an ongoing basis from persons not living with me.",
+    "rank": 3,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 3
+},
+{ "fields": {
+    "category": 1,
+    "slug": "unemployment",
+    "title": "Unemployment Benefits",
+    "text": "I receive unemployment benefits.",
+    "rank": 4,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 4
+},
+{ "fields": {
+    "category": 1,
+    "slug": "veteran",
+    "title": "Veteran Benefits",
+    "text": "I receive Veteran's Administration, GI Bill, or National Guard/Military benefits/Income.",
+    "rank": 5,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 5
+},
+{ "fields": {
+    "category": 1,
+    "slug": "socialsecurity",
+    "title": "Social Security Benefits",
+    "text": "I receive periodic social security payments.",
+    "rank": 6,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 6
+},
+{ "fields": {
+    "category": 1,
+    "slug": "unearned",
+    "title": "Unearned Income",
+    "text": "The household receives *unearned* income from family members age 17 or under (example: Social Security, Trust Fund disbursments, etc.).",
+    "rank": 7,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 7
+},
+{ "fields": {
+    "category": 1,
+    "slug": "supplemental",
+    "title": "Supplemental Security Income",
+    "text": "I receive Supplemental Security Income (SSI).",
+    "rank": 8,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 8
+},
+{ "fields": {
+    "category": 1,
+    "slug": "disability",
+    "title": "Disability Benefits",
+    "text": "I receive disability or death benefits other than Social Security.",
+    "rank": 9,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 9
+},
+{ "fields": {
+    "category": 1,
+    "slug": "publicassistance",
+    "title": "Public Asssistance Income",
+    "text": "I receive Public Asssistance Income (examples: TANF, AFDC).",
+    "rank": 10,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 10
+},
+{ "fields": {
+    "category": 1,
+    "slug": "child-support-entitled",
+    "title": "Support payments",
+    "text": "I am untitled to receive child support payments.",
+    "rank": 11,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 11
+},
+{ "fields": {
+    "category": 1,
+    "slug": "child-support-receive",
+    "title": "Support payments",
+    "text": "I am currently receiving child support payments. If yes, from how many persons do you receive support?",
+    "rank": 11,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 11
+},
+{ "fields": {
+    "category": 1,
+    "slug": "child-support-collect",
+    "title": "Support payments",
+    "text": "I am currently making efforts to collect child support owed to me. List efforts being made to collect child support:",
+    "rank": 11,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 11
+},
+
+{ "fields": {
+    "category": 1,
+    "slug": "alimony-support",
+    "title": "Support payments",
+    "text": "I receive alimony/spousal support payments.",
+    "rank": 12,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 12
+},
+{ "fields": {
+    "category": 1,
+    "slug": "trusts",
+    "title": "Trusts, Funds, etc.",
+    "text": "I receive periodic payments from trusts, annuities, inheritance, retirement funds or pensions, insurance policies, or lottery winnings. If yes, list sources:",
+    "rank": 13,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 13
+},
+{ "fields": {
+    "category": 1,
+    "slug": "property",
+    "title": "Income from Property",
+    "text": "I receive income from real or personal property.",
+    "rank": 14,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 14
+},
+{ "fields": {
+    "category": 1,
+    "slug": "studentfinancialaid",
+    "title": "Student financial aid",
+    "text": "Student financial aid (public or private, not including student loans). Subsctract cost of tuition from Aid received. * For Households receiving section 8 Assistance Only.",
+    "rank": 15,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 15
+},
+{ "fields": {
+    "category": 2,
+    "slug": "checking-account",
+    "title": "Checking Account",
+    "text": "I have a checking account(s). If yes, list bank(s)",
+    "rank": 16,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 16
+},
+{ "fields": {
+    "category": 2,
+    "slug": "savings-account",
+    "title": "Savings Account",
+    "text": "I have a savings account(s). If yes, list bank(s)",
+    "rank": 17,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 17
+},
+{ "fields": {
+    "category": 2,
+    "slug": "revocable-trust",
+    "title": "Revocable Trust",
+    "text": "I have a revocable trust(s). If yes, list bank(s)",
+    "rank": 18,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 18
+},
+{ "fields": {
+    "category": 2,
+    "slug": "real-estate",
+    "title": "Real Estate",
+    "text": "I own real estate. If yes, provide description:",
+    "rank": 19,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 19
+},
+{ "fields": {
+    "category": 2,
+    "slug": "stocks",
+    "title": "Stock and Bonds",
+    "text": "I own stocks, bonds, or Treasury Bills. If yes, list sources/bank names:",
+    "rank": 20,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 20
+},
+{ "fields": {
+    "category": 2,
+    "slug": "money-market",
+    "title": "CDs and Money Market Accounts",
+    "text": "I have certificates of Deposit (CD) or Money Market Account(s). If yes, list sources/bank names:",
+    "rank": 21,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 21
+},
+{ "fields": {
+    "category": 2,
+    "slug": "retirement",
+    "title": "Retirement Accounts",
+    "text": "I have an IRA/Lump Sum Pension/Keogh Account/401K. If yes, list bank(s)",
+    "rank": 22,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 22
+},
+{ "fields": {
+    "category": 2,
+    "slug": "life-insurance",
+    "title": "Life Insurance",
+    "text": "I have a whole life insurance policy. If yes, how many policies?",
+    "rank": 23,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 23
+},
+{ "fields": {
+    "category": 2,
+    "slug": "cash",
+    "title": "Cash",
+    "text": "I have cash on hand.",
+    "rank": 24,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 24
+},
+{ "fields": {
+    "category": 2,
+    "slug": "disposed-assets",
+    "title": "Disposed Assets",
+    "text": "I have disposed of assets (i.e. gave away money/assets) for less than the fair market value in the past 2 years. If yes, list items and date disposed.",
+    "rank": 25,
+    "multiple_sources": 1
+  },
+  "model": "tcapp.Question", "pk": 25
+},
+{ "fields": {
+    "category": 3,
+    "slug": "fulltime-students-current",
+    "title": "Full-time students",
+    "text": "Does the household consist of all persons who are full-time students (Examples: K-12, College, Trade School, etc.)?",
+    "rank": 26,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 26
+},
+{ "fields": {
+    "category": 3,
+    "slug": "fulltime-students-past",
+    "title": "Prior full-time students",
+    "text": "Does the household consist of all persons who have been full-time students 5 months in the current calendar year?",
+    "rank": 27,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 27
+},
+{ "fields": {
+    "category": 3,
+    "slug": "fulltime-students-future",
+    "title": "Future full-time students",
+    "text": "Does your household anticipate becoming an all full-time student household in the next 12 months?",
+    "rank": 28,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 28
+},
+{ "fields": {
+    "category": 3,
+    "slug": "tanf-assistance",
+    "title": "AFDC / TANF Assistance",
+    "text": "Receiving assistance under Title IV of the Social Security Act (AFDC/TANF/Cal Works - not SSA/SSI)",
+    "rank": 29,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 29
+},
+{ "fields": {
+    "category": 3,
+    "slug": "job-training-program",
+    "title": "Job Training Program",
+    "text": "Enrolled in a job training program receiving assistance through the Job Training Participation Act (JTPA) or another similar program",
+    "rank": 30,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 30
+},
+{ "fields": {
+    "category": 3,
+    "slug": "single-parent",
+    "title": "Single Parent / Dependent Child",
+    "text": "Single Parent with a dependant child or children and neither you nor your child(ren) are dependant of another individual.",
+    "rank": 31,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 31
+},
+{ "fields": {
+    "category": 3,
+    "slug": "married-filing-jointly",
+    "title": "Married / Joint Return",
+    "text": "Married and filling (or are entitle to file) a joint tax return",
+    "rank": 32,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 32
+},
+{ "fields": {
+    "category": 3,
+    "slug": "former-foster-care",
+    "title": "Former Foster Care",
+    "text": "Previously enrolled in the Foster Care program (currently age 18-24).",
+    "rank": 33,
+    "multiple_sources": 0
+  },
+  "model": "tcapp.Question", "pk": 33
+},
+{ "fields": {
+    "fips_2000": "0607599999",
+    "fips_2010": "0607599999",
+    "name": "San Francisco County",
+    "metro_area_name": "San Francisco, CA HUD Metro FMR Area",
+    "cbsa_sub": "METRO41860MM7360",
+    "region": "CA",
+    "is_metro": true
+  },
+  "model": "tcapp.County", "pk": 410
+},
+{ "fields": {
+    "slug": "nextgen-tower",
+    "name": "NextGen Tower",
+    "county": 410,
+    "account": "nextgen-tower",
+    "tcac_number": "CA-2015-19691",
+    "bin_number": "CA-2015-19691",
+    "street_address": "699 mission St.",
+    "locality": "San Francisco",
+    "postal_code": "94105",
+    "phone": "415-555-5555",
+    "placed_in_service": "2015-01-01T00:00:00Z",
+    "last_building": "2015-01-01T00:00:00Z"
+  },
+  "model": "tcapp.Property", "pk": 1
+},
+{ "fields": {
+    "lihtc_property": 1,
+    "ami_percentage": 60,
+    "units": 20
+  },
+  "model": "tcapp.PropertyAMIUnits", "pk": 1
+},
+{ "fields": {
+    "lihtc_property": 1,
+    "ami_percentage": 50,
+    "units": 10
+  },
+  "model": "tcapp.PropertyAMIUnits", "pk": 2
+},
+{ "fields": {
+    "created_at": "2015-01-01T00:00:00Z",
+    "lihtc_property": 1,
+    "nb_bedrooms": 1,
+    "full_amount": 2000,
+    "non_optional_amount": 0,
+    "name": "1 Bedroom"
+  },
+  "model": "tcapp.UtilityAllowance", "pk": 1
+},
+{ "fields": {
+    "created_at": "2015-01-01T00:00:00Z",
+    "lihtc_property": 1,
+    "nb_bedrooms": 2,
+    "full_amount": 1600,
+    "non_optional_amount": 1000,
+    "name": "2 Bedrooms"
+  },
+  "model": "tcapp.UtilityAllowance", "pk": 2
+},
+{ "fields": {
+    "created_at": "2015-01-01T00:00:00Z",
+    "lihtc_property": 1,
+    "nb_bedrooms": 3,
+    "full_amount": 2400,
+    "non_optional_amount": 1000,
+    "name": "3 Bedrooms"
+  },
+  "model": "tcapp.UtilityAllowance", "pk": 3
+},
+{
+  "fields": {
+    "created_at": "2017-01-01T00:00:00Z",
+    "program_ahdp": false,
+    "program_tax_exempt_rate": 0,
+    "program_home_rate": 0,
+    "federal_rent_assistance": 0,
+    "square_footage": 25,
+    "owner": "donny",
+    "monthly_other_charges": 0,
+    "federal_rent_restriction": 0,
+    "program_other_rate": 0,
+    "program_tax_credit": false,
+    "nb_bedrooms": 1,
+    "lihtc_property": 1,
+    "effective_date": "2015-11-07T16:56:11.091Z",
+    "rent_assistance_source": null,
+    "unit_number": "101",
+    "monthly_utility_allowance": 0,
+    "federal_income_restriction": 0,
+    "monthly_rent": 0,
+    "household_vacant": false,
+    "certification_type": "initial",
+    "slug": "ea709e622c8e40a6869b492c078b2b5f",
+    "program_other": null,
+    "program_ahdp_rate": 0,
+    "non_federal_rent_assistance": 0,
+    "program_home": false,
+    "program_tax_exempt": false,
+    "move_in_date": "2015-11-07T16:56:11.091Z"
+  },
+  "model": "tcapp.application", "pk": 1
+},
+{
+  "fields": {
+    "middle_initial": null,
+    "first_name": "John",
+    "last_name": "Deer",
+    "date_of_birth": "1946-02-02T08:00:00Z",
+    "ssn": "1234567890",
+    "email": "info@djaodjin.com",
+    "disabled": 2,
+    "phone": "415-555-5555",
+    "race": 8,
+    "ethnicity": 2,
+    "slug": "9bf9150cdf7149bc8e006df20765064f"
+  },
+  "model": "tcapp.resident", "pk": 1
+},
+{
+  "fields": {
+    "middle_initial": null,
+    "first_name": "Anna",
+    "last_name": "Deer",
+    "date_of_birth": "1946-04-02T08:00:00Z",
+    "ssn": "1234567890",
+    "email": "info@djaodjin.com",
+    "disabled": 2,
+    "phone": "415-555-5555",
+    "race": 8,
+    "ethnicity": 2,
+    "slug": "9bf9150cdf7149bc8e006df207650650"
+  },
+  "model": "tcapp.resident", "pk": 2
+},
+{
+  "fields": {
+    "starts_at": "2013-01-12T00:00:00Z",
+    "ends_at": "2015-12-31T00:00:00Z",
+    "locality": "San Francisco",
+    "country": "US",
+    "region": "CA",
+    "postal_code": "94102",
+    "street_address": "588 Sutter St.",
+    "resident": 1
+  },
+  "model": "tcapp.housinghistory", "pk": 1
+},
+{
+  "fields": {
+    "resident": 1,
+    "application": 1,
+    "relation_to_head": 1
+  },
+  "model": "tcapp.applicationresident", "pk": 1
+},
+{
+  "fields": {
+    "resident": 2,
+    "application": 1,
+    "relation_to_head": 4
+  },
+  "model": "tcapp.applicationresident", "pk": 2
+},
+{
+  "fields": {
+    "resident": 1,
+    "question": 2,
+    "present": true
+  },
+  "model": "tcapp.answer", "pk": 1
+},
+{
+  "fields": {
+    "slug": "mika-restaurant",
+    "resident": 1,
+    "mananger": null,
+    "name": "Mika Restaurant",
+    "locality": "San Francisco",
+    "country": "US",
+    "region": "CA",
+    "phone": "415-555-5555",
+    "postal_code": "94102",
+    "position": "Waiter",
+    "email": "xia@djaodjin.com",
+    "street_address": "588 Sutter St."
+  },
+  "model": "tcapp.source", "pk": 1
+},
+{
+  "fields": {
+    "group": "F1",
+    "category": 1,
+    "verified": 1,
+    "period_per_avg": 4000,
+    "resident": 1,
+    "question": 2,
+    "period": 1,
+    "starts_at": "2016-01-01T00:00:00Z",
+    "ends_at": "2016-01-01T00:00:00Z",
+    "source": 1,
+    "amount": 1250
+  },
+  "model": "tcapp.income", "pk": 1
+},
+{
+  "fields": {
+    "group": "F2",
+    "category": 1,
+    "verified": 2,
+    "period_per_avg": 0,
+    "resident": 1,
+    "question": 2,
+    "period": 0,
+    "starts_at": "2016-01-01T00:00:00Z",
+    "ends_at": "2016-06-30T00:00:00Z",
+    "source": 1,
+    "amount": 1250000
+  },
+  "model": "tcapp.income", "pk": 2
+},
+{
+  "fields": {
+    "group": "F3",
+    "category": 1,
+    "verified": 3,
+    "period_per_avg": 4000,
+    "starts_at": "2016-01-01T00:00:00Z",
+    "ends_at": "2016-02-01T00:00:00Z",
+    "resident": 1,
+    "question": 2,
+    "period": 0,
+    "source": 1,
+    "amount": 204800
+  },
+  "model": "tcapp.income", "pk": 3
+},
+{
+  "fields": {
+    "group": "F4",
+    "category": 1,
+    "verified": 3,
+    "period_per_avg": 4000,
+    "starts_at": "2016-02-01T00:00:00Z",
+    "ends_at": "2016-03-01T00:00:00Z",
+    "resident": 1,
+    "question": 2,
+    "period": 0,
+    "source": 1,
+    "amount": 207200
+  },
+  "model": "tcapp.income", "pk": 4
+},
+{
+  "fields": {
+    "group": "F5",
+    "category": 1,
+    "verified": 4,
+    "period_per_avg": 4000,
+    "starts_at": "2015-01-01T00:00:00Z",
+    "ends_at": "2016-01-01T00:00:00Z",
+    "resident": 1,
+    "question": 2,
+    "period": 0,
+    "source": 1,
+    "amount": 2500000
+  },
+  "model": "tcapp.income", "pk": 5
+},
+{
+  "fields": {
+    "group": "F5",
+    "category": 1,
+    "verified": 5,
+    "period_per_avg": 4000,
+    "resident": 1,
+    "question": 2,
+    "period": 1,
+    "starts_at": "2016-01-01T00:00:00Z",
+    "ends_at": "2016-01-01T00:00:00Z",
+    "source": 1,
+    "amount": 1250
+  },
+  "model": "tcapp.income", "pk": 1
+}]

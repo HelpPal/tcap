@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row" style="margin-bottom: 50px;">
+        <div class="col-sm-offset-3 col-sm-6">
+            <h3><i class="fa fa-search"></i> Find your LIHTC project ...</h3>
+            <form method="get" action="{% url 'project_search' %}">
+                <div class="input-group">
+                    <input class="form-control" maxlength="13" name="q" placeholder="CA-0000-00000 (or search by city or project)" type="text">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="submit">Search &raquo;</button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% block search_content %}
+    {% if query %}
+    {% if object_list %}
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-8">
+            {% for object in object_list %}
+            <div>
+                <div class="col-sm-5 text-center">
+                    <i class="fa fa-map-marker fa-2x"></i><br />
+                    <a href="{% url 'project_detail' object %}">{{object.tcac_number}}</a>
+                </div>
+                <div  class="col-sm-7" style="margin-bottom:25px;">
+                    <h4><a href="{% url 'project_detail' object %}" style="color: #333;">{{object.name}}</a></h4>
+                    <div class="adr">
+                        <span class="street-address">{{object.street_address}}</span><br />
+                        <span class="locality">{{object.locality}}</span><br />
+                        <abbr class="region" title="{{object.county.region}}">{{object.county.region}}</abbr>
+                        <span class="postal-code">{{object.postal_code}}</span><br />
+                        <span class="country-name">{{object.country.name}}</span>
+                    </div>
+                    <div class="text-left">
+                        <a href="{% url 'project_detail' object %}">Income and rent limits &raquo;</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="text-center">
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                <a href="?q={{query}}&page={{page_obj.previous_page_number}}">&laquo; previous</a>
+                {% endif %}
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?q={{query}}&page={{page_obj.next_page_number}}">next &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-8 text-center" style="margin-top: 50px;">
+            <p>
+                <i class="fa fa-meh-o fa-4x"></i>
+            </p>
+            <p>
+Sorry, <strong>{{query}}</strong> could not be found.
+            </p>
+            <p>
+Please verify you entered a number that looks like CA-NNNN-NNNN.
+            </p>
+            <p>
+If you think there is a mistake, please
+<a href="mailto:support@teacapp.co">contact us</a>.
+            </p>
+            <p>
+We do our best to reply within 24 hours. Thank you!
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+    {% endblock %}
+</div>
+{% endblock %}

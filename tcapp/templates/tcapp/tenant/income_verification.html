@@ -1,0 +1,128 @@
+{% extends "tcapp/tenant/base.html" %}
+
+{% block tenant_certification %}
+<div class="col-sm-offset-2 col-sm-8">
+<h1 class="text-center">
+    <i class="fa fa-user"></i> {{resident.printable_name}} Annual Income Verification
+</h1>
+{% with resident.total_income|humanize_money as total_income %}
+<table class="table">
+    <tr>
+        <th colspan="5"></th>
+        <th class="text-right">Annualized</th>
+    </tr>
+    {% for key, values in by_questions.items %}
+    {% if values %}
+    <tr>
+        <td colspan="5">
+            <a href="#{{key.slug}}">{{key.title}}</a>
+        </td>
+        <td class="text-right">
+            {{values|sum_greater_of_annualize_income|humanize_money}}
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    <tr>
+        <td colspan="6">
+            <div class="dropdown">
+                <button id="add-income" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><i class="fa fa-plus"></i> Add ... <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li><a href="{% url 'tenant_income_entry_selfemployed_new' application.lihtc_property resident %}">Self-employed income</a></li>
+                    <li><a href="{% url 'tenant_income_entry_employee_new' application.lihtc_property resident %}">Employee income</a></li>
+                    <hr />
+                    <li><a href="{% url 'tenant_income_entry_disability_new' application.lihtc_property resident %}">Disability benefits</a></li>
+                    <li><a href="{% url 'tenant_income_entry_publicassistance_new' application.lihtc_property resident %}">Public assistance benefits</a></li>
+                    <li><a href="{% url 'tenant_income_entry_socialsecurity_new' application.lihtc_property resident %}">Social security benefits</a></li>
+                    <li><a href="{% url 'tenant_income_entry_supplemental_new' application.lihtc_property resident %}">Supplemental (SSI) benefits</a></li>
+                    <li><a href="{% url 'tenant_income_entry_unemployment_new' application.lihtc_property resident %}">Unemployment benefits</a></li>
+                    <li><a href="{% url 'tenant_income_entry_veteran_new' application.lihtc_property resident %}">Veteran benefits</a></li>
+<hr />
+                    <li><a href="{% url 'tenant_income_entry_support_new' application.lihtc_property resident %}">Child or Alimony support</a></li>
+                    <li><a href="{% url 'tenant_income_entry_studentfinancialaid_new' application.lihtc_property resident %}">Student financial aid</a></li>
+                    <li><a href="{% url 'tenant_income_entry_gifts_new' application.lihtc_property resident %}">Other</a></li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <th colspan="5">Total</th>
+        <th class="text-right">{{total_income}}</th>
+    </tr>
+</table>
+{% endwith %}
+
+{% for key, values in by_questions.items %}
+{% if values %}
+<a name="{{key.slug}}"></a><h2>{{key.title}}</h2>
+<table class="table">
+    {% for source, verifications in values.items  %}
+    {% with verifications|greater_of_annualize_income as greater_of %}
+    <tr>
+        <th colspan="6" class="alert alert-info">{{source.printable_name}} <a href="{% url 'tenant_income_source' application resident source %}"><i class="fa fa-pencil-square-o"></i> Edit</a></th>
+    </tr>
+    {% for verified, incomes in verifications.items %}
+    <tr>
+        <th colspan="6">{{verified|get_verified_display}}</th>
+    </tr>
+    {% for income in incomes %}
+    <tr>
+        <td>
+            <a id="{{key.slug}}-{{forloop.counter}}" href="{% url 'tenant_income_entry' application.lihtc_property resident income %}">{{income.get_category_display}}</a>
+        </td>
+        <!-- details -->
+        <td>
+            {{income.amount|humanize_money}}
+        </td>
+        {% if income.period > 0 %}
+        <td>
+            {{income.get_period_display}}
+            {% with income.get_period_per_avg_display as period_rate %}
+            {% if period_rate %}
+            * {{period_rate}}
+            {% endif %}
+            {% endwith %}
+        </td>
+        <td colspan="2">
+            * {{income.get_avg_per_year_display}}
+        </td>
+        {% else %}
+        <td class="text-center">
+            From {{income.starts_at|date}} to {{income.ends_at|date}}<br />
+            <span class="text-center" style="font-size:0.8em;">{{income.nb_days}} days</span>
+        </td>
+        <td colspan="2">
+            {% if income.verified|has_implicit_period %}
+            * {{income.get_avg_per_year_display}}
+            {% endif %}
+        </td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+    <tr>
+        {% if verified == 3 %}
+        {# VERIFIED_PERIOD_TO_DATE #}
+        <td class="text-left" colspan="2" style="font-size:0.8em;">
+            ({{incomes|sum_amount|humanize_money}} over {{incomes|sum_days}} days)
+        </td>
+        {% endif %}
+        {% with incomes|annualize_income:verified as total_annualized %}
+        <th class="text-right" colspan="{% if verified == 3 %}3{% else %}5{% endif %}">
+            {% if total_annualized == greater_of %}
+            (Greater Of)
+            {% endif %}
+            Total Annualized
+        </th>
+        <th class="text-right">
+            <span class="{% if total_annualized == greater_of %}greater-of{% endif %}">{{total_annualized|humanize_money}}</span>
+        </th>
+        {% endwith %}
+    </tr>
+    {% endfor %}
+    {% endwith %}
+    {% endfor %}
+</table>
+{% endif %}
+{% endfor %}
+</div>
+{% endblock %}

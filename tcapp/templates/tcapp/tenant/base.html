@@ -1,0 +1,43 @@
+{% extends "tcapp/base.html" %}
+{% load assets %}
+{% load tcapptags %}
+
+{% block tcapp_content %}
+{% include "tcapp/_application_breadcrumb.html" %}
+{% if resident %}
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb">
+            <li>{{resident.printable_name}}</li>
+            <li{% if urls.resident.resident_update == request.path %} class="active"{% endif %}>
+                <a href="{{urls.resident.resident_update}}">Personal</a>
+            </li>
+            <li{% if urls.resident.demographic_profile == request.path %} class="active"{% endif %}>
+                <a href="{{urls.resident.demographic_profile}}">Demographic</a>
+            </li>
+            {% if resident.is_adult %}
+            <li{% if urls.resident.tenant_contact == request.path %} class="active"{% endif %}>
+                <a href="{{urls.resident.tenant_contact}}">Contact</a>
+            </li>
+            <li{% if urls.resident.income_verification == request.path %} class="active"{% endif %}>
+                <a href="{{urls.resident.income_verification}}">Income</a>
+            </li>
+            <li{% if urls.resident.assets_verification == request.path %} class="active"{% endif %}>
+                <a href="{{urls.resident.assets_verification}}">Assets</a>
+            </li>
+            {% endif %}
+        </ol>
+    </div>
+</div>
+{% endif %}
+{% block tenant_certification %}{% endblock %}
+{% endblock %}
+
+{% block bodyscripts %}
+{{block.super}}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+  $("[name='region']").region({country:$("[name='country']")});
+});
+</script>
+{% endblock %}

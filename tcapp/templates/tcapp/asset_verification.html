@@ -1,0 +1,52 @@
+{% extends "tcapp/tenant/base.html" %}
+{% load tcapptags %}
+
+{% block tenant_certification %}
+<div class="col-sm-offset-2 col-sm-8">
+    <h1 class="text-center">
+        <i class="fa fa-user"></i> {{resident.printable_name}} Asset Verification
+    </h1>
+    <table class="table">
+        <tr>
+            <th></th>
+            <th class="text-right">Amount</th>
+            <th class="text-right">Interest Rate</th>
+        </tr>
+        {% for source, verifications in by_source.items  %}
+        <tr>
+            <th colspan="3" class="alert alert-info">{{source.printable_name}} <a href="{% url 'tenant_income_source' application resident source %}"><i class="fa fa-pencil-square-o"></i> Edit</a></th>
+        </tr>
+        {% for category, assets in verifications.items %}
+        {% with assets|greater_of_assets as greater_of %}
+        <tr>
+            <th colspan="3">{{category|get_asset_category_display}}</th>
+        </tr>
+        {% for asset in assets %}
+        <tr>
+            <td>
+                <a href="{% url 'tenant_asset_entry' application.lihtc_property resident asset %}">{{asset.verified|get_verified_display}}</a>
+            </td>
+            <td class="text-right" {% if asset.amount == greater_of %}style="text-decoration:underline;"{% endif %}>
+                {{asset.amount|humanize_money}}
+            </td>
+            <td class="text-right">
+                {{asset.interest_rate|humanize_percentage}}
+            </td>
+        </tr>
+        {% endfor %}
+        {% endwith %}
+        {% endfor %}
+        {% endfor %}
+        <tr>
+            <td colspan="3">
+                <a id="add-asset" class="btn btn-default" href="{% url 'tenant_assets_entry_new' application.lihtc_property resident %}"><i class="fa fa-plus"></i> Add ...</a>
+            </td>
+        </tr>
+        <tr>
+            <th>Total</th>
+            <th class="text-right">{{resident.cash_value_of_assets|humanize_money}}</th>
+            <th></th>
+        </tr>
+    </table>
+</div>
+{% endblock %}

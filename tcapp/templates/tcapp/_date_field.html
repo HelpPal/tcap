@@ -1,0 +1,18 @@
+{% with field.name|slugify as name %}
+<div id="div_id_{{name}}" class="form-group{% if wrapper_class %} {{ wrapper_class }}{% endif %}{% if form_show_errors%}{% if field.errors %} has-error{% endif %}{% endif %}{% if field.css_classes %} {{ field.css_classes }}{% endif %}">
+    <label for="id_{{name}}" class="control-label{% if field.required %} requiredField {% endif %}">
+        {{field.label|safe}}{% if field.required %}<span class="asteriskField">*</span>{% endif %}
+    </label>
+    <p class="input-group">
+        <input id="id_{{name}}"
+               name="{{name}}"
+               value="{{field.value|date:'m-d-Y'}}"
+               type="text" class="datetimeinput form-control" uib-datepicker-popup="[[format]]" ng-model="{{name}}.val" is-open="{{name}}.opened" datepicker-options="dateOptions" {% if field.required %}ng-required="true"{% endif %} close-text="Close" />
+        <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="open($event, {{name}})"><i class="fa fa-calendar"></i></button>
+        </span>
+    </p>
+    {% include 'bootstrap3/layout/help_text_and_errors.html' %}
+    <p>(MM-DD-YYYY)</p>
+</div>
+{% endwith %}

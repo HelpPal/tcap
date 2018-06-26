@@ -1,0 +1,8 @@
+{% if request|url_profile %}
+<li><a href="{{'/app/'|site_prefixed}}">App</a></li>
+<li><a id="authenticated-user" href="{{request|url_profile}}">{{request.user.username}}</a></li>
+<li><a title="Click Here to sign out" href="{{'logout/'|site_prefixed}}">Sign Out <span class="fa fa-sign-out fa-lg"></span></a></li>
+{% else %}
+<li><a href="{{'/'|site_prefixed}}">Home</a></li>
+<li><a title="Click Here to sign into your account" href="{{'login/'|site_prefixed}}"><span class="fa fa-sign-in fa-lg"></span> Sign In</a></li>
+{% endif %}

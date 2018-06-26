@@ -1,0 +1,48 @@
+{% extends "tcapp/application_base.html" %}
+{% load assets %}
+{% load tcapptags %}
+
+{% block application_content %}
+<section id="all-tenant-forms">
+    <h2>Forms to be signed by all tenants</h2>
+    <table class="table">
+      {% for doc in forms %}
+      <tr>
+          <td><a href="{{doc.link}}" target="_blank">{{doc.title}}</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+</section>
+<hr />
+<section id="per-tenant-docs">
+    {% for tenant in tenants %}
+    <div class="row {% cycle 'odd' 'even' %}">
+        <h2>Forms to be signed by {{tenant.printable_name}}</h2>
+        <table class="table">
+            {% for doc in tenant.forms %}
+            <tr>
+                <td><a href="{{doc.link}}" target="_blank">{{doc.title}}</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+    </div>
+</section>
+<section>
+    <p>
+Getting started with the LIHTC? See <a href="/docs/example-checklists/">Checklist examples</a>
+    </p>
+    <p>
+Disclaimer:
+Certifying tenants is the responsability of the property management.
+We strongly recommend that you check with the applicable state housing agency
+to verify that the state agrees with the numbers provided. The numbers round
+down to the nearest $1. TEACAPP, LLC provides no assurance of the accuracy
+of the particular results you may obtain from presented Income Limits or maximum
+rents; which is designed only to be a quick reference tool and is no substitute
+for professional tax and accounting advice. IRS guidelines and actual HUD
+amounts should be used for any final decisions.
+    </p>
+</section>
+{% endblock %}

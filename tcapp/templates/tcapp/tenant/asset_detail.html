@@ -1,0 +1,195 @@
+{% extends "tcapp/tenant/base.html" %}
+
+{% block tenant_certification %}
+<section id="applicant-0" class="wizard-step">
+    <div class="wizard-content">
+        <div class="content-inner container">
+            <h2>Tenant Assets</h2>
+            <div id="fiduciaries-[[$index]]" class="information" ng-repeat="source in activeApplicant.fiduciaries" ng-cloak>
+                <button class="btn btn-trash" style="float:right;" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                <form class="wizard-item text-left" ng-submit="completeApplication('{% url 'api_application' application.lihtc_property application %}', 'PUT')" style="padding:20px;">
+<div class="row">
+    <div class="col-md-4">
+        <div>
+            <fieldset ng-cloak>
+                <legend>Source <a href="{{urls.resident.tenant_asset_source_base}}[[source.slug ? source.slug : 'new']]/{% if urls.asset %}?next={{urls.asset}}{% endif %}" ng-show="hasSourceSelected(source)"><i class="fa fa-pencil-square-o"></i></a></legend>
+                <div ng-show="hasSourceSelected(source)">
+                    <div class="form-group" ng-show="hasSourcePosition(source)">
+                        <label class="control-label requiredField">
+                            Postion/Job title
+                        </label>
+                        <div class="controls">
+                            [[source.position]]
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">
+                            3rd party contact information
+                        </label>
+                        <div class="controls">
+                            [[source.name]]
+                        </div>
+                        <div class="vcard">
+                            <p>
+                                <span class="adr">
+                                    <span class="street-address">[[source.street_address]]</span><br />
+                                    <span class="locality">[[source.locality]]</span><br />
+                                    <abbr class="region" title="[[source.region]]">[[source.region]]</abbr>
+                                    <span class="postal-code">[[source.postal_code]]</span><br />
+                                    <span class="country-name">[[source.country.name]]</span>
+                                </span>
+                            </p>
+                            <p>
+Email: <span class="email">[[source.email]]</span>
+                            </p>
+                            <p>
+Phone: <span class="tel">[[source.phone]]</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="!hasSourceSelected(source)">
+                    <div class="form-group">
+                        <select class="select form-control" name="source" ng-change="checkAddSource(source)" ng-model="source.pk">
+                            <option value="" disabled selected>Please select a source ...</option>
+                            <option value="[[src.pk]]" ng-repeat="src in sources">[[src.position && src.name ? src.position + " at " + src.name : (src.position ? src.position : "") + (src.name ? src.name : "")]]</option>
+                            <option value="add-source"><i class="fa fa-plus"></i> Add another source ...</option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="col-md-4" ng-show="hasSourceSelected(source)" ng-cloak>
+        <fieldset>
+            <legend>Verification method</legend>
+            <div class="row">
+                <div class="form-group controls">
+                    <select id="verified" class="select form-control" name="verified" ng-model="source.verified" ng-change="updateVerified(source)">
+                        <option value="" disabled selected>Please choose one ...</option>
+                        <option value="[[VERIFIED_TENANT]]">Tenant - Direct calculation</option>
+                        <option value="[[VERIFIED_EMPLOYER]]">3rd party - Direct calculation</option>
+                    </select>
+                    <span class="help-block"></span>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset style="margin-top:15px;">
+            <legend>Documentation</legend>
+            <div class="documentation-uploaded" style="margin-bottom: 25px;">
+                <div class="documentation">
+                    <a href="{% url 'tenant_verification_employment_base' application.lihtc_property resident %}[[source.slug]]/" target="_blank"><i class="fa fa-download"></i> Information release form</a>
+                    <hr />
+                    <div ng-repeat="doc in source.docs" style="margin:10px 0;">
+                    <a target="_blank" href="[[doc.url]]" ng-show="doc.url">[[doc.printable_name]] <i class="fa fa-eye"></i></a>
+                    </div>
+                    <div class="document-upload dj-upload"
+                         data-complete-url="{{urls.api_document_upload}}"
+                         data-tenant="[[activeApplicant.slug]]"
+                         data-source="[[source.slug]]"
+                         data-category="1"
+                         djupload-success>
+                        <div class="documentation dropzone-previews previewsContainer">
+                            <span class="dz-default dz-message"><i class="fa fa-cloud"></i> Upload supporting document</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="col-md-4" ng-show="hasVerificationSelected(source)" ng-cloak>
+        <fieldset>
+            <legend>Notes</legend>
+            <div class="controls">
+                <textarea class="form-control" name="notes" ng-model="notes.text"
+                          maxlength="255" type="text" rows="10"></textarea>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<div class="row" ng-show="hasVerificationSelected(source)" ng-cloak>
+    <fieldset class="col-sm-12" ng-if="source.assets.length > 0">
+        {% block tenant_asset_group_amounts %}
+        <legend>Cash Value</legend>
+        <div id="assets-[[$index]]" class="row" ng-repeat="asset in source.assets">
+            <div class="col-xs-4 no-padding-left">
+                <select class="select form-control" name="asset-[[$parent.index]]-[[$index]]-category" ng-model="asset.category">
+                    {% with bogus|asset_categories as asset_categories_dict %}
+                    {% for option_key, option_value in asset_categories_dict.items %}
+                    <option value="{{option_value}}">{{option_value}}</option>
+                    {% endfor %}
+                    {% endwith %}
+                </select>
+                <span class="help-block"></span>
+            </div>
+            <div class="col-xs-4 no-padding-right">
+                <div class="input-group">
+                    <span class="input-group-addon">$</span>
+                    <input class="form-control" maxlength="50" name="asset-[[$parent.index]]-[[$index]]-amount" type="text" ng-model="asset.amount"></input>
+                </div>
+                <span class="help-block"></span>
+            </div>
+            <div class="col-xs-4 no-padding">
+                <div class="input-group">
+                    <input id="Interest" class="form-control" maxlength="50" name="asset-[[$parent.index]]-[[$index]]-interest" type="text" ng-model="asset.interest_rate"></input>
+                    <span class="input-group-addon">%</span>
+                </div>
+                <span class="help-block"></span>
+            </div>
+        </div>
+        {% endblock %}
+    </fieldset>
+</div>
+<div class="text-center" ng-show="hasVerificationSelected(source)">
+    <div class="btn-group">
+        <button type="submit" class="btn btn-wizard">{% if form.submit_title %}{{form.submit_title}}{% else %}Update{% endif %}</button>
+    </div>
+</div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- modal dialogs -->
+    <form id="confirm-delete" class="modal fade"
+          tabindex="-1" role="dialog" aria-labelledby="Delete"
+          aria-hidden="true" method="post" action=".">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close"
+                            data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Delete Entry</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <p>
+Are you sure you would like to delete this entry ?
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="submit btn btn-primary"
+                            data-dismiss="modal" ng-click="deleteEntry('{% url 'api_application' application.lihtc_property application %}', 'PUT')">OK</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- end of modal dialog -->
+</section>
+{% block calculation_help_block %}
+{% endblock %}
+{% endblock %}
+
+{% block bodyscripts %}
+{{block.super}}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+  $(".dj-upload").djupload({
+    uploadUrl: "{% if urls.edit.media_upload %}{{urls.edit.media_upload}}{% else %}{{urls.api_document_upload}}{% endif %}",
+  });
+});
+</script>
+{% endblock %}

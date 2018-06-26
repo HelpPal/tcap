@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{# Because we don't want to have a prominent "Sign-in" button show up. #}
+{% if request|url_profile %}
+{% include "generic_navbar.html" %}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% include "tcapp/_calculation.html" %}
+<div class="col-sm-12">
+<div class="text-center">
+    <p>
+    {% with income_limit_50=application|income_limit:50 income_limit_60=application|income_limit:60 %}
+    {% if application.total_annual_income <= income_limit_50 %}
+You may qualify for 50% and below.
+    {% elif application.total_annual_income <= income_limit_60 %}
+You may qualify for 60% and below.
+    {% else %}
+You may not qualify at this time.
+    {% endif %}
+    {% endwith %}
+    <br />
+A member of our property staff will contact you. Thank you!
+    </br />
+    <span style="font-size:0.8em;">
+The above household income estimate is subject to verification and actual
+income may vary.
+    </span>
+    </p>
+</div>
+<div class="disclaimers">
+    <h3>Disclaimers</h3>
+    <p>
+The income calculator does not have the ability to qualify you for low income
+housing program. Qualification for affordable housing programs may require
+additional information and supporting documentation such proof of income and/or
+subsidies received. Information such as income and rents are subject to change
+at any time and without notice.
+    </p>
+    <p>
+Data including rent limits, income limits, projects' information, and affordable
+housing data provided by TEACAPP LLC are subject to change and accuracy is not
+guaranteed. TEACAPP, LLC does not guarantee the accuracy of any information
+available on this site, and is not responsible for any errors, omissions,
+or misrepresentations.
+    </p>
+    <p>
+Be sure to read the
+<a href="{{'/legal/terms-of-use'|site_prefixed}}">Terms of Service below</a>,
+as they cover the terms and conditions that apply to your use of this website
+(the "Website," or "Site"). TEACAPP, LLC ("TEACAPP") may change the Terms of
+Service from time to time. By continuing to use the Site following such
+modifications, you agree to be bound by such modifications to the Terms
+of Service.
+    </p>
+</div>
+</div>
+{% endblock %}

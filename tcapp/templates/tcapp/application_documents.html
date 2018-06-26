@@ -1,0 +1,37 @@
+{% extends "tcapp/application_base.html" %}
+{% load assets %}
+{% load tcapptags %}
+
+{% block application_content %}
+<section id="supporting-documents">
+    <div class="col-sm-offset-3 col-sm-6">
+        <h2>Certification Documents</h2>
+        <div class="documentation-uploaded" style="margin-bottom: 25px;">
+            <div class="documentation">
+                <div ng-repeat="doc in application.docs" style="margin:10px 0;">
+                    <a target="_blank" href="[[doc.url]]" ng-show="doc.url">[[doc.printable_name]] <i class="fa fa-eye"></i></a>
+                </div>
+                <div class="document-upload dj-upload"
+                     data-complete-url="{{urls.api_document_upload}}"
+                     djupload-success docs="application.docs">
+                    <div class="documentation dropzone-previews previewsContainer">
+                        <span class="dz-default dz-message"><i class="fa fa-cloud"></i> Upload documentation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block bodyscripts %}
+{{block.super}}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+  $(".dj-upload").djupload({
+    uploadUrl: "{% if urls.edit.media_upload %}{{urls.edit.media_upload}}{% else %}{{urls.api_document_upload}}{% endif %}",
+  });
+});
+</script>
+{% endblock %}
+

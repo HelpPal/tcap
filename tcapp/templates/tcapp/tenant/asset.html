@@ -1,0 +1,56 @@
+{% extends "tcapp/tenant/base.html" %}
+{% load assets %}
+{% load crispy_forms_tags %}
+{% load tcapptags %}
+
+{% block tenant_certification %}
+<div class="col-sm-offset-2 col-sm-8 tic-Assets">
+  <h1 class="text-center">
+    <i class="fa fa-user"></i> Tenant {{question.get_category_display}}
+  </h1>
+  <h4 class="text-center">(One Form per Adult Member of the Household)</h4>
+  <form action="." method="post">
+    {% csrf_token %}
+    <div class="question-body">
+    {{question.text}}
+    </div>
+    <div class="form-group fix-bootstrap-radio">
+        <label class="radio">
+            <input type="radio"{% if form.present.value %}checked="checked"{% endif %} name="{{form.present.html_name}}" id="id_{{form.present.html_name}}_0" value="True">Yes
+        </label>
+    </div>
+    {% if question.multiple_sources %}
+    <table class="table">
+    {% for asset in records %}
+    {% ifchanged asset.source %}
+    <tr>
+        <td colspan="2">{{asset.source}}</td>
+    </tr>
+    {% endifchanged %}
+        <tr>
+            <td>
+    <a href="{% url 'tenant_asset_entry' application.lihtc_property resident question asset %}">{{asset.category}}</a>
+            </td>
+            <td class="text-right">
+                {{asset.amount|humanize_money}}
+            </td>
+        </tr>
+    {% endfor %}
+        <tr>
+            <td colspan="2"><a href="{% url 'tenant_asset_entry' application.lihtc_property resident question next_record_rank %}">Add ...</a></td>
+        </tr>
+    </table>
+    {% else %}
+    {% crispy form %}
+    {% endif %}
+    <div class="form-group fix-bootstrap-radio">
+        <label class="radio">
+            <input type="radio"{% if not form.present.value %}checked="checked"{% endif %} name="{{form.present.html_name}}" id="id_{{form.present.html_name}}_1" value="False"> No
+        </label>
+    </div>
+    <div class="form-actions tic-next">
+        <input type="submit" name="submit" value="Next >>" class="btn btn-primary" id="submit-id-submit">
+    </div>
+  </form>
+</div>
+{% endblock %}

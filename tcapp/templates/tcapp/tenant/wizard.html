@@ -1,0 +1,2106 @@
+{% comment %}
+The wizard has a structure fundamentally different from the rest
+of the application. It is also the only page that prospect tenant
+interacts with.
+Plus we want to workaround issues on Android tablets as well.
+{% endcomment %}
+{% load assets %}
+{% load tcapptags %}
+{% load static from staticfiles %}
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="TeaCapp LLC">
+    <meta name="copyright" content="Copyright (c) 2018 TeaCapp LLC">
+    <title>Application | TeaCapp &copy;</title>
+    {% assets "css_base" %}
+    <link rel="stylesheet" media="screen" href="{{ ASSET_URL }}" />
+    {% endassets %}
+    {% assets "js_base" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+    <link href="//fonts.googleapis.com/css?family=Sonsie+One" rel="stylesheet" type="text/css">
+    {% if csrf_token %}
+    <meta name="csrf-token" content="{{csrf_token}}">
+    <script type="text/javascript">
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+            }
+        }
+    });
+    </script>
+    {% endif %}
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-default navbar-fixed-top" style="background-color:transparent;border:none;">
+      <div class="navbar-header">
+        <a class="navbar-brand" style="padding: 0;" href="/"><img src="{% static 'img/logo-tcapp.png' %}" width="50" height="50" /></a>
+      </div>
+    </nav>
+  </header>
+  <div>
+      <div id="messages">
+          <div id="messages-content">
+          </div>
+      </div>
+      <div ng-app="tcappApp" ng-cloak>
+          <div ng-controller="tcappCtrl">
+<!-- tcapp_content -->
+<form>
+<section id="applicant-[[$index]]" ng-repeat="applicant in application.applicants">
+<div id="fullname" class="wizard-step" role="form">
+  <div class="wizard-content" style="background-image: url({% static 'img/california-flag-30.jpg' %});">
+    <!-- photo credit: <a href="http://www.flickr.com/photos/93755244@N00/4128667008">California Republic</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+    <div class="content-inner container">
+      <h2>Hello, please tell us your full name?</h2>
+      <div>
+          <div class="row">
+              <div class="col-sm-offset-2 col-sm-8 form-group">
+                  <input class="form-control" maxlength="50" name="full_name" type="text" ng-model="applicant.full_name"></input>
+              </div>
+          </div>
+          <div class="form-actions">
+              <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="unit-type" class="wizard-step">
+    <div class="wizard-content">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/24271893@N07/8842921715">cliché!</a> <a href="https://creativecommons.org/licenses/by-nd/2.0/">(license)</a> -->
+        <div class="content-inner container">
+            <div class="row">
+                <div class="col-sm-3 text-right">
+                    <img width="100px" height="100px" src="{% static 'img/logo-tcapp.png' %}" />
+                </div>
+                <div class="col-sm-9">
+                    <blockquote>
+                        <p>
+<i class="fa fa-quote-left"></i> Hi [[first_name(applicant.full_name)]],
+                        </p>
+                        <p>
+{% if lihtc_property_signed_up %}
+Welcome to {{lihtc_property.name}},
+using TeaCapp, we will help you move in faster to your affordable unit.
+{% else %}
+Using TeaCapp, you will able to estimate your income and see if you may
+qualify you for an affordable unit at {{lihtc_property.name}}.
+{% endif %}
+<i class="fa fa-quote-right"></i>
+                        </p>
+                    </blockquote>
+                </div>
+            </div>
+            <div ng-if="$index < 1">
+                <h2>What unit type are you looking to move into?</h2>
+                <div>
+                    {% for allowance in utility_allowances %}
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-{{allowance.nb_bedrooms}}-bedroom" ng-click="gotoStep($event)">{{allowance.name}}</button>
+                    </div>
+                    {% endfor %}
+                </div>
+{% if not lihtc_property_signed_up %}
+                <p>
+This is not application for residency at {{lihtc_property.name}}.
+                </p>
+{% endif %}
+            </div>
+            <div ng-if="$index > 0">
+                <h2>What is your relation to the Head of Household?</h2>
+                <div>
+                    <div class="col-md-offset-2 col-md-8">
+                        <div class="form-group">
+                            {% include "tcapp/_relation_to_head.html" with name="applicant-[[$index]]-relation_to_head" model="applicant.relation_to_head" show_tenant_choices=True %}
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="clearfix form-group"></div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="about-yourself" class="wizard-step">
+    <div class="wizard-content" style="background-image: url({% static 'img/muni-rail-15.jpg' %});">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/32029534@N00/7177773858">grasshopper with electric wings : muni, judah street, outer sunset (2012)</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container">
+            <div class="row">
+                <div class="col-sm-3 text-right">
+                    <img width="100px" height="100px" src="{% static 'img/logo-tcapp.png' %}" />
+                </div>
+                <div class="col-sm-9">
+                    <blockquote>
+                        <p>
+<i class="fa fa-quote-left"></i> Excellent [[first_name(applicant.full_name)]]!
+                        </p>
+                        <p>
+In order to
+{% if lihtc_property_signed_up %} help you apply for your new home, and{% endif %}
+benefit from below market rate rent under <a href="http://www.treasurer.ca.gov/ctcac/tax.asp" target="_blank">California Low-Income Housing Tax Credit Program</a>,
+we will need to gather some basic information about you, your household,
+your income and your assets.
+                        </p>
+                        <p>
+We will try to make it as fast and convenient as possible.<i class="fa fa-quote-right"></i>
+                        </p>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="row">
+                <div class="btn-group">
+                    <button class="btn btn-wizard" ng-click="gotoStep($event)">Next &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="date-of-birth" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/7332125@N04/4256682894">San Francisco Cable Car 16</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container">
+            <h2>When do we celebrate your birthday?</h2>
+            <p>
+                Please select your date of birth.
+            </p>
+            <div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="monthOfBirth">Month:</label>
+                        </div>
+                        <div class="col-md-4">
+                            <select id="monthOfBirth" class="form-control" name="month-of-birth" ng-model="applicant.date_of_birth.month">
+                                <option value="0">January</option>
+                                <option value="1">February</option>
+                                <option value="2">March</option>
+                                <option value="3">April</option>
+                                <option value="4">May</option>
+                                <option value="5">June</option>
+                                <option value="6">July</option>
+                                <option value="7">August</option>
+                                <option value="8">September</option>
+                                <option value="9">October</option>
+                                <option value="10">November</option>
+                                <option value="11">December</option>
+                            </select>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="dayOfBirth">Day</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input id="dayOfBirth" class="form-control" type="number" min="1" max="31" name="day-of-birth" type="text" ng-model="applicant.date_of_birth.day"></input>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="yearOfBirth">Year</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input id="yearOfBirth" class="form-control" type="number" min="1900" max="2018" name="year-of-birth" type="text" ng-model="applicant.date_of_birth.year"></input>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="applicant.date_of_birth.year > 0">
+                <p>
+                    You are [[age(applicant.date_of_birth)]] Years old.
+                </p>
+                <p ng-show="bornSameYear(applicant.date_of_birth).length > 0">
+                    Did you know [[bornSameYear(applicant.date_of_birth)]] was born the same year
+                    you were?
+                </p>
+                <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="marital-status" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/7332125@N04/4256682894">San Francisco Cable Car 16</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container">
+            <h2>What is your marital status?</h2>
+            <p>
+Whether you are married (filing or entitled to file jointly), separated,
+or legally separated could affect your income computation and thus your
+eligibility.
+            </p>
+            <p>
+                I am ...
+            </p>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-married-file-jointly" ng-click="setMaritalStatus($event, applicant, MARRIED_FILE_JOINTLY)">Married (filing<br />or entitled to file jointly)</button>
+                    <button class="btn btn-wizard btn-separated" ng-click="setMaritalStatus($event, applicant, SEPARATED)">Separated<br />&nbsp;</button>
+                    <button class="btn btn-wizard btn-legaly-separated" ng-click="setMaritalStatus($event, applicant, LEGALY_SEPARATED)"><span style="text-decoration:underline;">Legally</span><br />separated</button>
+                </div>
+                <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-not-married" ng-click="setMaritalStatus($event, applicant, MARITAL_STATUS_NONE_OF_THE_ABOVE)">None of the above<br />&nbsp;</button>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="children" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Will you have dependent children living with you in the unit?</h2>
+            <p>(soon to be born or under 18 years of age)</p>
+            <div ng-show="application.children.length === 0">
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="addFirstChild($event, application.children, '#children-details')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div ng-show="application.children.length > 0">
+                <p>
+The following children are currently listed on the application:
+                </p>
+            </div>
+            <div id="children-details" class="information trigger">
+                <div id="children-[[$index]]" class="wizard-item" ng-repeat="child in application.children">
+                    <div class="text-right">
+                        <button class="btn btn-trash" ng-click="removeAtIndex($event, application.children, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-offset-2 col-md-2">
+                                <label class="control-label">Full name</label>
+                            </div>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" placeholder="Full name" name="children-[[$index]]-full_name" ng-model="child.full_name"></input>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-offset-2 col-md-2">
+                                <label class="control-label">Relationship</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div>
+                                    {% include "tcapp/_relation_to_head.html" with name="children-[[$index]]-relation" model="child.relation_to_head" show_child_choices=True %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-offset-2 col-md-2">
+                                <label class="control-label">Date of Birth</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    {% include "tcapp/_date_field_js.html" with date="child.date_of_birth" prefix="children-[[$index]]-" %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-offset-4 col-md-6">
+                                <label class="control-label checkbox">
+                                    <input type="checkbox" ng-model="child.full_time_student"> This child is a full-time student at a school, college or university.
+                                </label>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" ng-show="application.children.length > 0">
+                    <div class="btn-group">
+                        <button class="btn btn-default btn-sm btn-add" ng-click="addChild($event, application.children)"><i class="fa fa-plus"></i> Add another child</button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                    </div>
+                </div>
+            </div> <!-- /children-details -->
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire student status -->
+<div id="student" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>I qualify as a full time student.</h2>
+            <p>(I understand the requirements to qualify as a full-time student.)</p>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#student-details')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="student-details" class="wizard-item information trigger" style="display:none;">
+                <div>
+                    <div class="text-right">
+                        <button class="btn btn-trash" ng-click="XXX"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                    </div>
+                    <fieldset class="text-justify">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-4 col-md-6">
+                                    <label class="control-label checkbox">
+                                        <input type="checkbox" name="student_current" ng-model="applicant.student_status.current"> I am currently a  <span style="text-decoration:underline;">full-time</span> student (Examples: K-12, College, Trade School, etc).
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-4 col-md-6">
+                                    <label class="control-label checkbox">
+                                        <input type="checkbox" name="student_past" ng-model="applicant.student_status.past"> I have been a <span style="text-decoration:underline;">full-time</span> student at least 5 full months since [[studentLowerBound()]].
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-4 col-md-6">
+                                    <label class="control-label checkbox">
+                                        <input type="checkbox" name="student_future" ng-model="applicant.student_status.future"> I am planning to become a <span style="text-decoration:underline;">full-time</span> student before [[studentUpperBound()]].
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="text-justify"
+                              ng-show="isFullTimeStudent(applicant.student_status)">
+                        <div class="row">
+                            <div class="col-md-offset-2 col-md-10">
+                                <p>
+Please select from the following criteria to qualify:
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-4 col-md-6">
+                                    <label class="control-label checkbox">
+                                        <input type="checkbox" ng-model="applicant.student_status.title_iv"> I receive assistance under Title IV of the Social Security Act (AFDC/TANF/Cal Works - not SSA/SSI).
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-4 col-md-6">
+                                    <label class="control-label checkbox">
+                                        <input type="checkbox" ng-model="applicant.student_status.job_training"> I am enrolled in a job training program receiving assistance through the Job Training Participation Act (JTPA) or other similar program.
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-4 col-md-6">
+                                    <label class="control-label checkbox">
+                                        <input type="checkbox" ng-model="applicant.student_status.has_children"> I am a single parent with a dependant child or children and neither me or my child(ren) are dependant of another individual.
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-4 col-md-6">
+                                    <label class="control-label checkbox">
+                                        <input type="checkbox" ng-model="applicant.student_status.fosterCare"> I was previously enrolled in the Foster Care program (currently age 18-24).
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group text-center">
+                            <button class="btn btn-wizard btn-sm btn-student-section8" ng-click="showNode($event, '#student-section8')" ng-if="section8Hidden">Next &raquo;</button>
+                        </div>
+                    </fieldset>
+                </div>
+                <!-- TIC Questionnaire 15 -->
+                <div id="student-section8" style="display:none;">
+                    <h3>Are you receiving Section 8 Assistance?</h3>
+                    <div>
+                        <div class="btn-group">
+                            <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#student-section8-details')">Yes</button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                        </div>
+                    </div>
+                    <div id="student-section8-details" role="form" class="form" style="display:none;">
+                        <div class="clearfix form-group"></div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <label class="control-label">Student Financial Aid</label>
+                                <p>
+                                    (public or private, not including student loans)
+                                </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input class="form-control" type="number" min="0" step="any" placeholder="amount" ng-model="applicant.student_status.financial_aid.amount"></input>
+                                        <span class="input-group-addon">/ Monthly</span>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <label class="control-label">Cost of Tuition</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input class="form-control" type="number" min="0" step="any" placeholder="amount" ng-model="applicant.student_status.cost_of_tuition.amount"></input>
+                                        <span class="input-group-addon">/ Monthly</span>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+$[[studentFinancialAid(applicant.student_status)]]/monthly will be added as income to the TIC.
+                            <button class="btn btn-wizard btn-sm btn-next" ng-click="gotoStep($event)">Correct &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 1 -->
+<div id="selfemployed" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <div class="content-inner container">
+            <h2>I have self-employed income.</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="addSource($event, applicant.selfemployed)">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="selfemployed-[[$index]]" class="information" ng-repeat="source in applicant.selfemployed">
+                <div class="wizard-item">
+                    <div class="text-right">
+                        <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.selfemployed, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                    </div>
+                    <h3>What is your activity?</h3>
+                    <div>
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="control-label">I am a</label>
+                            <input class="form-control input-sm"
+                                   name="selfemployed-[[$index]]-position" placeholder="position"
+                                   type="text" ng-model="source.position"></input>
+                            <span class="help-block"></span>
+                        </div>
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="control-label">at</label>
+                            <input class="form-control input-sm"
+                                   name="selfemployed-[[$index]]-name"
+                                   placeholder="business name"
+                                   type="text" ng-model="source.name"></input>
+                            <span class="help-block"></span>
+                        </div>
+                        <button ng-hide="source.incomes.length > 0" class="btn btn-wizard btn-self-employed" ng-click="addSourceIncomes($event, applicant.selfemployed, {'other': 'self-employed'}, {period: YEARLY})">Next</button>
+                    </div>
+                    <div ng-if="source.incomes.length > 0">
+                        <div role="form">
+                            <h3>How much <span style="text-decoration:underline;">net</span> income do you generate?</h3>
+                            <p>
+Net income is defined as the difference of total revenue/income from your business minus all expenses related to your business operations.
+                            </p>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-offset-3 col-xs-3 no-padding-right">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input class="form-control" name="selfemployed-[[$index]]-amount" type="number" min="0" step="any" ng-model="source.incomes[0].amount" />
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                    <div class="col-xs-3 no-padding-left">
+                                        <select class="select form-control" name="selfemployed-[[$index]]-period" ng-model="source.incomes[0].period">
+                                            {% with bogus|income_periods as income_periods_dict %}
+                                            {% for option_key, option_value in income_periods_dict.items %}
+                                            <option value="{{option_key}}">{{option_value}}</option>
+                                            {% endfor %}
+                                            {% endwith %}
+                                        </select>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <label class="control-label checkbox">
+                                            <input type="checkbox" name="cash_wages" id="id_cash_wages" ng-model="source.cash_wages"> Please check this box if you are paid in cash.
+                                        </label>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="source.incomes[0].amount > 0">
+                                <p>
+Thank you for contributing to the economy! You are generating [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] of net revenue for yourself.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" ng-show="applicant.selfemployed.length > 0 && applicant.selfemployed[applicant.selfemployed.length - 1].incomes.length > 0">
+                <div class="btn-group">
+                    <button ng-click="addSource($event, applicant.selfemployed)" class="btn btn-default btn-sm btn-add"><i class="fa fa-plus"></i> Add a position</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 2 -->
+<div id="employee" class="wizard-step">
+    <div class="wizard-content">
+        <!-- <a href="http://www.flickr.com/photos/11886296@N00/164505203">Wells Fargo Coach</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/">(license)</a> -->
+        <div class="content-inner container">
+            <h2>Do you work as an employee?</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="addSource($event, applicant.employee)">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="employee-[[$index]]" class="information" ng-repeat="source in applicant.employee">
+                <div class="wizard-item">
+                    <div class="text-right">
+                        <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.employee, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                    </div>
+                    <h3>Where do you work?</h3>
+                    <div>
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="control-label">I am a</label>
+                            <input class="form-control input-sm"
+                                   name="employee-[[$index]]-position" placeholder="position"
+                                   type="text" ng-model="source.position"></input>
+                            <span class="help-block"></span>
+                        </div>
+                        <div class="form-group" style="display: inline-block;">
+                            <label class="control-label">at</label>
+                            <input class="form-control input-sm"
+                                   name="employee-[[$index]]-name"
+                                   placeholder="employer (or empty)"
+                                   type="text" ng-model="source.name"></input>
+                            <span class="help-block"></span>
+                        </div>
+                        <button ng-hide="source.incomes.length > 0" class="btn btn-wizard btn-wages" ng-click="addSourceIncomes($event, applicant.employee, CATEGORY)">Next &raquo;</button>
+                    </div>
+                    <div ng-if="source.incomes.length > 0">
+                        <div>
+                            <h3>What is your compensation at [[source.name]]?</h3>
+                            <div id="incomes-[[$index]]" ng-repeat="account in source.incomes">
+                                <div class="form-group">
+                                    <label class="control-label">I get paid [[CATEGORY[account.category] ]]:</label>
+                                <div id="employee-[[$parent.$index]]-source-[[$index]]" class="row">
+                                    <div class="col-xs-offset-2 col-xs-2 no-padding-right">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input class="form-control" name="[[CATEGORY[account.category].replace(' ','-')]]-amount" type="number" min="0" step="any" placeholder="amount" ng-model="account.amount"></input>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                    <div class="col-xs-2 no-padding">
+                                        {% include "tcapp/_period_field.html" with name="[[CATEGORY[account.category].replace(' ','-')]]-period" ng_model="account.period" %}
+                                    </div>
+                                    <div class="col-xs-2 no-padding" ng-show="hasPeriodRates(source, account)">
+                                        <div class="input-group">
+                                            <input class="form-control" name="[[CATEGORY[account.category].replace(' ','-')]]-period-per-avg" type="number" min="0" step="any" placeholder="hours" ng-model="account.period_per_avg"></input>
+                                            <span class="input-group-addon">[[asPeriodNouns(account.period)]]</span>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                    <div class="col-xs-2 no-padding-left" ng-show="hasPeriodRates(source, account)">
+                                        {% include "tcapp/_period_avg_field.html" with class="input-group-addon" name="[[CATEGORY[account.category].replace(' ','-')]]-avg" ng_model="account.avg" %}
+                                    </div>
+                                </div>
+                                </div>
+                            </div> <!-- //  ng-repeat: source.incomes -->
+                            <div class="clearfix" style="margin-bottom: 15px;"></div>
+                            <div class="form-group">
+                                <label class="control-label">I work at this position</label>
+                                <input class="form-control" type="number" min="0" step="any" name="avg-per-year" ng-model="source.avg_per_year" style="display:inline-block;width: 25%;"></input>
+                                <span class="help-block"></span>
+                                <label class="control-label">[[naturalPerYear(source.incomes[0].period)]].</label>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label checkbox">
+                                    <input type="checkbox" name="cash_wages" id="id_cash_wages" ng-model="source.cash_wages"> Please check this box if you are paid in cash.
+                                </label>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div ng-show="($index === applicant.employee.length - 1) && source.position.length > 0 && source.incomes.length > 0">
+                    <div class="btn-group">
+                        <button ng-click="addSource($event, applicant.employee)" class="btn btn-default btn-sm btn-add"><i class="fa fa-plus"></i> Add a position</button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 4 -->
+<div id="unemployment-benefits" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- <a href="http://www.flickr.com/photos/11886296@N00/164505203">Wells Fargo Coach</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Are you receiving any unemployment benefits?</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#unemployment-benefits-amount')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="unemployment-benefits-amount" class="col-sm-offset-2 col-sm-8" style="display:none;">
+                <div id="unemployment-[[$index]]" ng-repeat="source in applicant.unemployment">
+                    <h3 class="control-label requiredField" for="unemploymentBenefitsAmount">How much is your unemployment benefits check?</h3>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-xs-4 no-padding-right">
+                                <div class="input-group">
+                                    <span class="input-group-addon">$</span>
+                                    <input id="unemploymentBenefitsAmount" class="form-control" type="number" min="0" step="any" placeholder="amount" name="unemployment-[[$index]]-amount" ng-model="source.incomes[0].amount"></input>
+                                </div>
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="col-xs-4 no-padding">
+                                {% include "tcapp/_period_avg_field.html" with name="unemployment-[[$index]]-period" ng_model="source.incomes[0].period" ng_change="periodUpdated(source.incomes[0])" %}
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="col-xs-4 no-padding-left">
+                                <div class="input-group">
+                                    <input class="form-control" type="number" min="0" step="any" placeholder="[[asPeriodNouns(source.incomes[0].period)]]" ng-model="source.incomes[0].avg_per_year"></input>
+                                    <span class="input-group-addon">[[asPeriodNouns(source.incomes[0].period)]]/year</span>
+                                </div>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-show="source.incomes[0].amount > 0">
+                        <p>
+Are you sure, [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] for [[source.incomes[0].avg_per_year]] [[asPeriodNouns(source.incomes[0].period)]] of the year?
+                        </p>
+                        <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 5 -->
+<div id="veteran-benefits" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/63080087@N06/6461696531">The 297th Medical Company returns home as the last California National Guard unit to leave Iraq</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Are you receiving any veteran benefits?</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#veteran-benefits-amount')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="veteran-benefits-amount" class="col-sm-offset-2 col-sm-8 information" style="display:none;">
+                <div id="veteran-[[$index]]" ng-repeat="source in applicant.veteran">
+                    <div class="form-group">
+                        <h3 class="control-label requiredField" for="veteranBenefitsAmount">How much is your veteran benefits check?</h3>
+                        <div class="row">
+                            <div class="col-xs-4 no-padding-right">
+                                <div class="input-group">
+                                    <span class="input-group-addon">$</span>
+                                    <input id="veteranBenefitsAmount" class="form-control" type="number" min="0" step="any" placeholder="amount" name="veteran-[[$index]]-amount" ng-model="source.incomes[0].amount"></input>
+                                </div>
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="col-xs-4 no-padding">
+                                {% include "tcapp/_period_avg_field.html" with name="veteran-[[$index]]-period" ng_model="source.incomes[0].period" ng_change="periodUpdated(source.incomes[0])" %}
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="col-xs-4 no-padding-left">
+                                <div class="input-group">
+                                    <input class="form-control" type="number" min="0" step="any" placeholder="[[asPeriodNouns(source.incomes[0].period)]]" name="veteran-[[$index]]-avg-per-year" ng-model="source.incomes[0].avg_per_year"></input>
+                                    <span class="input-group-addon">[[asPeriodNouns(source.incomes[0].period)]]/year</span>
+                                </div>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-show="source.incomes[0].amount > 0">
+                        <p>
+Are you sure, [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] for [[source.incomes[0].avg_per_year]] [[asPeriodNouns(source.incomes[0].period)]] of the year?
+                        </p>
+                        <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 6 -->
+<div id="social-benefits" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- <a href="http://www.flickr.com/photos/11886296@N00/164505203">Wells Fargo Coach</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Are you receiving any social security benefits?</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#social-benefits-amount')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div class="information">
+                <div id="social-benefits-amount" class="col-sm-offset-2 col-sm-8" style="display:none;">
+                    <div id="socialsecurity-[[$index]]" ng-repeat="source in applicant.socialsecurity">
+                        <div class="form-group">
+                            <h3 class="control-label requiredField" for="socialBenefitsAmount">How much is your social security check?</h3>
+                            <div class="row">
+                                <div class="col-xs-4 no-padding-right">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input id="socialBenefitsAmount" class="form-control" type="number" min="0" step="any" placeholder="amount" name="socialsecurity-[[$index]]-amount" ng-model="source.incomes[0].amount"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4 no-padding">
+                                    {% include "tcapp/_period_avg_field.html" with name="socialsecurity-[[$index]]-period" ng_model="source.incomes[0].period" ng_change="periodUpdated(source.incomes[0])" %}
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4 no-padding-left">
+                                    <div class="input-group">
+                                        <input class="form-control" type="number" min="0" step="any" placeholder="[[asPeriodNouns(source.incomes[0].period)]]" ng-model="source.incomes[0].avg_per_year"></input>
+                                        <span class="input-group-addon">[[asPeriodNouns(source.incomes[0].period)]]/year</span>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="source.incomes[0].amount > 0">
+                            <p>
+Are you sure, [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] for [[source.incomes[0].avg_per_year]] [[asPeriodNouns(source.incomes[0].period)]] of the year?
+                            </p>
+                            <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 8 -->
+<div id="supplemental-benefits" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- <a href="http://www.flickr.com/photos/11886296@N00/164505203">Wells Fargo Coach</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Are you receiving any Supplemental Security Income (SSI) benefits?</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#supplemental-benefits-amount')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div class="information">
+                <div id="supplemental-benefits-amount" class="col-sm-offset-2 col-sm-8" style="display:none;">
+                    <div id="supplemental-[[$index]]" ng-repeat="source in applicant.supplemental">
+                        <div class="form-group">
+                            <h3 class="control-label requiredField" for="supplementalBenefitsAmount">How much is your SSI check?</h3>
+                            <div class="row">
+                                <div class="col-xs-4 no-padding-right">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input id="supplementalBenefitsAmount" class="form-control" type="number" min="0" step="any" placeholder="amount" ng-model="source.incomes[0].amount"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4 no-padding">
+                                    {% include "tcapp/_period_avg_field.html" with name="supplemental-[[$index]]-period" ng_model="source.incomes[0].period" ng_change="periodUpdated(source.incomes[0])" %}
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4 no-padding-left">
+                                    <div class="input-group">
+                                        <input class="form-control" type="number" min="0" step="any" placeholder="[[asPeriodNouns(source.incomes[0].period)]]" ng-model="source.incomes[0].avg_per_year"></input>
+                                        <span class="input-group-addon">[[asPeriodNouns(source.incomes[0].period)]]/year</span>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="source.incomes[0].amount > 0">
+                            <p>
+Are you sure, [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] for [[source.incomes[0].avg_per_year]] [[asPeriodNouns(source.incomes[0].period)]] of the year?
+                            </p>
+                            <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 9 -->
+<div id="disability-benefits" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- <a href="http://www.flickr.com/photos/11886296@N00/164505203">Wells Fargo Coach</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Are you receiving any disability or death benefits other than Social Security?</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#disability-benefits-amount')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div class="information">
+                <div id="disability-benefits-amount" class="col-sm-offset-2 col-sm-8" style="display:none;">
+                    <div id="disability-[[$index]]" ng-repeat="source in applicant.disability">
+                        <div class="form-group">
+                            <h3 class="control-label requiredField" for="disabilityBenefitsAmount">How much is your check?</h3>
+                            <div class="row">
+                                <div class="col-xs-4 no-padding-right">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input id="disabilityBenefitsAmount" class="form-control" type="number" min="0" step="any" placeholder="amount" name="disability-[[$index]]-amount" ng-model="source.incomes[0].amount"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4 no-padding">
+                                    {% include "tcapp/_period_avg_field.html" with name="disability-[[$index]]-period" ng_model="source.incomes[0].period" ng_change="periodUpdated(source.incomes[0])" %}
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4 no-padding-left">
+                                    <div class="input-group">
+                                        <input class="form-control" type="number" min="0" step="any" placeholder="[[asPeriodNouns(source.incomes[0].period)]]" ng-model="source.incomes[0].avg_per_year"></input>
+                                        <span class="input-group-addon">[[asPeriodNouns(source.incomes[0].period)]]/year</span>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="source.incomes[0].amount > 0">
+                            <p>
+Are you sure, [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] for [[source.incomes[0].avg_per_year]] [[asPeriodNouns(source.incomes[0].period)]] of the year?
+                            </p>
+                            <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 10 -->
+<div id="public-assistance-benefits" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- <a href="http://www.flickr.com/photos/11886296@N00/164505203">Wells Fargo Coach</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Are you receiving any public-assistance other than Social Security? (examples: TANF, AFDC)</h2>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#public-assistance-benefits-amount')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="public-assistance-benefits-amount" class="information col-sm-offset-2 col-sm-8" style="display:none;">
+                <div id="publicassistance-[[$index]]" ng-repeat="source in applicant.publicassistance">
+                    <div class="form-group">
+                        <h3 class="control-label requiredField" for="publicAssistanceBenefitsAmount">How much is your check?</h3>
+                        <div class="row">
+                            <div class="col-xs-4 no-padding-right">
+                                <div class="input-group">
+                                    <span class="input-group-addon">$</span>
+                                    <input id="publicAssistanceBenefitsAmount" class="form-control" type="number" min="0" step="any" placeholder="amount" name="publicassistance-[[$index]]-amount" ng-model="source.incomes[0].amount"></input>
+                                </div>
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="col-xs-4 no-padding">
+                                {% include "tcapp/_period_avg_field.html" with name="publicassistance-[[$index]]-period" ng_model="source.incomes[0].period" ng_change="periodUpdated(source.incomes[0])" %}
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="col-xs-4 no-padding-left">
+                                <div class="input-group">
+                                    <input class="form-control" type="number" min="0" step="any" name="avg_per_year" placeholder="[[asPeriodNouns(source.incomes[0].period)]]" ng-model="source.incomes[0].avg_per_year"></input>
+                                    <span class="input-group-addon">[[asPeriodNouns(source.incomes[0].period)]]/year</span>
+                                </div>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-show="source.incomes[0].amount > 0">
+                        <p>
+Are you sure, [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] for [[source.incomes[0].avg_per_year]] [[asPeriodNouns(source.incomes[0].period)]] of the year?
+                        </p>
+                        <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 11, 12 -->
+<div id="support_payments" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- <a href="http://www.flickr.com/photos/11886296@N00/164505203">Wells Fargo Coach</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Are you receiving (or entitled to receive) child support and/or spousal support payments?</h2>
+            <p>
+Child support and/or spousal support payments that are received shall be included as income whether or not there is yet a court order awarding payment. 
+            </p>
+<!--
+            <p>
+Child/Spousal support amounts awarded by the courts but not received can be excluded only when the applicant/resident certifies that payments are not being made and further documents that all reasonable legal actions to collect amounts due, including filing with the appropriate courts or agencies responsible for enforcing payment, have been taken.
+            </p>
+-->
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="addSupportPayment($event, applicant.support_payments)">Yes, I am entitled to<br />receive payments</button>
+                    <button class="btn btn-wizard btn-yes" ng-click="addSupportPayment($event, applicant.support_payments)">Yes, I am receiving<br />payments</button>
+                    <button class="btn btn-wizard btn-yes" ng-click="addSupportPayment($event, applicant.support_payments)">I am making efforts<br />to collect payments</button>
+                </div>
+                <div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                    </div>
+                </div>
+            </div>
+            <div class="information" ng-show="applicant.support_payments.length > 0">
+                <h3>From who and how much are you entitled to?</h3>
+                <div id="support_payments-[[$index]]" ng-repeat="source in applicant.support_payments">
+                    <div class="wizard-item">
+                        <div class="text-right">
+                            <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.support_payments, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-xs-4">
+                                <label class="control-label">For Whom?</label>
+                            </div>
+                            <div class="col-xs-6">
+                                <select class="select form-control" name="source-dependent" ng-model="source.dependent">
+                                    <option value="" disabled selected>Please choose one ...</option>
+                                    <option value="myself">Myself</option>
+                                    <option value="child-[[$index]]" ng-repeat="child in application.children">[[child.full_name]]</option>
+                                </select>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-xs-4">
+                                <label class="control-label">Person's name</label>
+                            </div>
+                            <div class="col-xs-6">
+                                <input name="source-name" class="form-control" maxlength="50" type="text" placeholder="Full name" ng-model="source.name" />
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div id="incomes-[[$index]]" ng-repeat="account in source.incomes">
+                            <div class="form-group row">
+                                <div class="col-xs-4">
+                                    <label class="control-label">Amount</label>
+                                </div>
+                                <div class="col-xs-4 no-padding-right">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input class="form-control" type="number" min="0" step="any" placeholder="amount" name="amount" ng-model="account.amount" />
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-2 no-padding-left">
+                                    {% include "tcapp/_period_avg_field.html" with name="support-[[$index]]-period" ng_model="account.period" %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <label class="control-label">How is payment received?</label>
+                                </div>
+                                <div class="col-xs-4 no-padding-right form-group">
+                                    <select class="select form-control" name="payer" ng-model="account.payer">
+                                        <option value="" disabled selected>Please choose one ...</option>
+                                        <option value="Enforcement agency">Enforcement agency</option>
+                                        <option value="Court of Law">Court of Law</option>
+                                        <option value="Direct from responsible party">Direct from responsible party</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-2 no-padding-left form-group">
+                                    <input class="form-control" maxlength="50" type="text" placeholder="agency name" ng-model="source.position" />
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-xs-4">
+                                    <label class="control-label">What are these payments for?</label>
+                                </div>
+                                <div class="col-xs-4 no-padding-right">
+                                    <select class="select form-control" name="category" ng-model="account.category">
+                                        <option value="" disabled selected>Please choose one ...</option>
+                                        <option value="child support">Child Support</option>
+                                        <option value="spousal support">Spousal Support</option>
+                                    </select>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-xs-4">
+                                    <label class="control-label">Amount awarded by court order?</label>
+                                </div>
+                                <div class="col-xs-4 no-padding-right">
+                                    <select class="select form-control" name="court_award" ng-model="account.court_award">
+                                        <option value="" disabled selected>Please choose one ...</option>
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-xs-offset-2 col-xs-8">
+                                    <label class="checkbox">
+                                        <input id="collection-[[$index]]" type="checkbox" ng-model="account.collection" name="collection" /> Please check if payment not received or if amount received is less than amount awarded.
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row form-group" ng-show="account.collection">
+                                <div class="col-xs-offset-2 col-xs-8">
+                                    <div class="text-left">
+                                        <label class="control-label">Please provide details and documentation of collection efforts.</label>
+                                        <textarea class="form-control" ng-model="account.descr" style="width:100%;"></textarea>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix form-group"></div>
+                    <div ng-show="($index === applicant.support_payments.length - 1) && source.name.length > 0 && source.incomes[0].amount > 0">
+                        <div class="btn-group">
+                            <button ng-click="addSupportPayment($event, applicant.support_payments)" class="btn btn-default btn-sm btn-add"><i class="fa fa-plus"></i> Add another support</button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIC Questionnaire 3, 13 -->
+<div id="other-income" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <div class="content-inner container trigger">
+            <h2>Are you receiving any other periodic payments?</h2>
+            <div class="col-md-offset-2 col-md-8">
+                <p>
+This includes periodic payments from trusts, annuities, inheritance, retirement
+funds or pensions, insurance policies, lottery winnings, as well as cash
+contributions of gifts including rent or utility payments, on an ongoing
+basis from persons not living with me. Please also list
+<span style="text-decoration:underline;">unearned</span> income
+from family members age 17 or under (example: social security, trust fund
+disbursments, etc).
+                </p>
+            </div>
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="addOtherPayment($event, applicant.others)">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="other-income-amount" class="information" ng-show="applicant.others.length > 0">
+                <h3>From who and how much?</h3>
+                <div id="others-[[$index]]" ng-repeat="source in applicant.others">
+                    <div id="incomes-0" role="form" class="wizard-item form">
+                        <div class="text-right">
+                            <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.others, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <label class="control-label">Organization/Person's name</label>
+                            </div>
+                            <div class="col-xs-6">
+                                <input name="source-name-[[$index]]" class="form-control" maxlength="50" type="text" placeholder="Full name" ng-model="source.name"></input>
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <label class="control-label">Amount</label>
+                            </div>
+                            <div class="col-xs-4 no-padding-right">
+                                <div class="input-group">
+                                    <span class="input-group-addon">$</span>
+                                    <input class="form-control" type="number" min="0" step="any" placeholder="0" name="others-[[$index]]-amount" ng-model="source.incomes[0].amount"></input>
+                                </div>
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="col-xs-2 no-padding-left">
+                                    {% include "tcapp/_period_avg_field.html" with name="others-[[$index]]-period" ng_model="source.incomes[0].period" %}
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <label class="control-label">Type of Income</label>
+                            </div>
+                            <div class="col-xs-4 no-padding-right">
+                                <div class="form-group">
+                                    <select class="select form-control" type="text" name="others-[[$index]]-category" ng-model="source.incomes[0].category">
+                                        <option value="" disabled selected>Please choose one ...</option>
+                                        <option value="annuities">annuities</option>
+                                        <option value="gifts">gifts</option>
+                                        <option value="inheritance">inheritance</option>
+                                        <option value="insurance-policies">insurance policies</option>
+                                        <option value="lottery-winnings">lottery winnings</option>
+                                        <option value="pensions">pensions</option>
+                                        <option value="retirement-funds">retirement funds</option>
+                                        <option value="trusts">trusts</option>
+                                        <option value="unearned">unearned income from family members age 17 or under</option>
+                                    </select>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                       <div ng-show="source.name.length > 0 && source.incomes[0].amount > 0 && source.incomes[0].category.length > 0">
+I receive [[source.incomes[0].amount | currency]] [[asPeriodText(source.incomes[0].period)]] from [[source.name]] of [[source.incomes[0].category]].
+                        </div>
+                    </div>
+                    <div class="clearfix form-group"></div>
+                    <div ng-show="($index === applicant.others.length - 1) && source.name.length > 0 && source.incomes[0].amount > 0 && source.incomes[0].category.length > 0">
+                         <div class="btn-group">
+                            <button ng-click="addOtherPayment($event, applicant.others)" class="btn btn-default btn-sm btn-add"><i class="fa fa-plus"></i> Add another periodic payment</button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assets -->
+<div id="real-estate" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3019969323">Formal approach with Moon Shutters, a Sweet 1920's style California House, San Mateo, USA</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div id="property-content" class="content-inner container trigger">
+            <h2>Did you own a home (Real Property) in the last 24 months?</h2>
+            {% if  real_estates %}
+            <div>
+              The household already reported:
+              <ul>
+              {% for real_estate in real_estates %}
+              <li>{{real_estate.get_category_display}} {% if real_estate.descr %}{{real_estate.descr}}{% else %}real-estate{% endif %} worth {{real_estate.amount|humanize_money}}</li>
+              {% endfor %}
+              </ul>
+              Click <em>Yes</em> to add real estate not mentionned above.
+              Click <em>No</em> otherwise.
+            </div>
+            {% endif %}
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#property-owner')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="property-owner" class="col-md-12 information trigger wizard-item" style="display:none;">
+                <div class="text-right">
+                    <button class="btn btn-trash" ng-click="removeAtIndex($event, realEstates, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                </div>
+                <h3>Do you still own it?</h3>
+                <div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-yes" ng-click="activeNode($event, '#real-estate-asset', ['#property-sold'])">Yes</button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-no" ng-click="activeNode($event, '#property-sold', ['#real-estate-asset'])">No</button>
+                    </div>
+                </div>
+                <div id="real-estate-asset" class="col-md-12 trigger" style="display:none;">
+                    <h4>Please describe the real estate property and its cash value</h4>
+                    <div role="form">
+                        <fieldset class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4 text-right">
+                                    <label class="control-label">Market Value</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input class="form-control" type="number" name="real-estate-asset-amount" ng-model="applicant.properties[0].amount"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-8">
+                                    <div class="form-group text-left">
+                                        <label class="control-label" for="realEstateDescr">Where is it located? How many bedrooms? etc.</label>
+                                        <textarea id="realEstateDescr" class="form-control" ng-model="applicant.properties[0].descr" style="width:100%;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="form-group">
+                            <button class="btn btn-wizard btn-next" ng-click="showNode($event, '#property-rental')">Next &raquo;</button>
+                        </div>
+                    </div>
+                    <div id="property-rental" class="trigger" style="display:none;">
+                        <h4>Do you rent out this real estate property to others?</h4>
+                        <div>
+                            <div class="btn-group">
+                                <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#property-rental-question')">Yes</button>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-wizard btn-no" ng-click="showNode($event, '#property-reverse-mortgage')">No</button>
+                            </div>
+                        </div>
+                        <div id="property-rental-question" style="display: none;">
+                            <div role="form">
+                                <div class="form-group">
+                                </div>
+                                <fieldset class="form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="totalMortgage">Total mortgage owed</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input id="totalMortgage" class="form-control" type="number" ng-model="applicant.properties[0].total_mortgage"></input>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                                </fieldset>
+                                <fieldset class="form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="rentCollected">Rent collected</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input id="rentCollected" class="form-control" type="number" ng-model="applicant.properties[0].rent_collected"></input>
+                                            <span class="input-group-addon">/ Monthly</span>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="monthlyMortgage">Mortgage owed</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input id="monthlyMortgage" class="form-control" type="number" ng-model="applicant.properties[0].monthly_mortgage"></input>
+                                            <span class="input-group-addon">/ Monthly</span>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="maintenance">Maintenance cost</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input id="maintenance" class="form-control" type="number" ng-model="applicant.properties[0].maintenance"></input>
+                                            <span class="input-group-addon">/ Monthly</span>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                                </fieldset>
+                                <div class="form-group">
+                                    <p>
+$[[incomeFromPropertyRental(applicant.properties[0])]] will be listed as income on the TIC.
+                                    </p>
+                                    <button class="btn btn-wizard btn-next" ng-click="showNode($event, '#property-reverse-mortgage')">Next &raquo;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="property-reverse-mortgage" class="trigger" style="display:none;">
+                        <h4>Do you have a reverse mortgage on the property?</h4>
+                        <div>
+                            <div class="btn-group">
+                                <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#property-reverse-mortgage-question')">Yes</button>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                            </div>
+                        </div>
+                        <div id="property-reverse-mortgage-question" style="display: none;">
+                            <div role="form">
+                                <div class="form-group">
+                                </div>
+                                <fieldset class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label for="reverseMortgage">Principal balance due</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">$</span>
+                                                <input id="reverseMortgage" class="form-control" type="number" ng-model="applicant.properties[0].reverse_mortgage"></input>
+                                                <span class="input-group-addon">/ Monthly</span>
+                                            </div>
+                                            <span class="help-block"></span>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <div class="form-group">
+                                    <p>
+$[[cashValueOfProperty(applicant.properties[0])]] will be added to your assets.
+                                    </p>
+                                    <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="property-sold" class="col-md-12" style="display:none;">
+                    <div role="form">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-3 col-md-6">
+                                    <h4>When did you sell it?</h4>
+                                    {% include "tcapp/_date_field_js.html" with date="applicant.properties[0].sell_at" %}
+                                </div>
+                            </div>
+                        </div>
+                        <fieldset class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <label for="sellPrice">Sale price</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input id="sellPrice" class="form-control" type="number" ng-model="applicant.properties[0].sell_price"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <label for="totalMortgage">Mortgage owed</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input id="totalMortgage" class="form-control" type="number" ng-model="applicant.properties[0].total_mortgage"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <label for="sellClosingCost">Closing cost</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input id="sellClosingCost" class="form-control" type="number" ng-model="applicant.properties[0].sell_closing_cost"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="clearfix" style="margin-bottom: 15px;"></div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <label class="control-label">
+                                        <input type="checkbox" ng-model="applicant.properties[0].foreclosure" /> This property was foreclosed.
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <p>
+You must provide copies of the <span style="text-decoration:underline;">final</span> foreclosure documents. Notices of Foreclosure will not be accepted as valid documentation.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <label class="control-label">
+                                        <input type="checkbox" ng-model="applicant.properties[0].short_sale" /> This property was a short sale.
+                                    </label>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <p>
+You must provide proof of the short sale such as a 1099-C showing the amount and the final debt forgiveness.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+Your total sales proceeds are $[[salesProceedsProperty(applicant.properties[0])]]
+<button class="btn btn-wizard btn-sm btn-next" ng-click="addPropertySold($event, applicant.properties[0])">Correct &raquo;</button>
+                        </div>
+                    </div>
+                    <div id="proceeds-deposit" class="proceeds-information" style="display:none;">
+                        <h4>Did you save your sales proceeds at the bank?</h4>
+                        <div style="margin-bottom: 15px;">
+                            <div class="btn-group">
+                                <button class="btn btn-wizard btn-yes" ng-click="addPropertyAccount($event, applicant.properties[0])">Yes</button>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                            </div>
+                        </div>
+                        <div class="information" ng-repeat="account in applicant.properties[0].assets">
+                            <div class="text-right">
+                                <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.properties[0].assets, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                            </div>
+                            <div id="proceeds-bank" role="form">
+                                <div class="row">
+                                    <div class="col-md-offset-2 col-md-4">
+                                        <label class="control-label">What is the name of the bank?</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group" style="width:100%;">
+                                            <input class="form-control"
+                                                   name="source-name"
+                                                   type="text" ng-model="account.name"
+                                                   placeholder="Name"
+                                                   uib-typeahead="bank.name for bank in getBanks($viewValue)"
+                                                   uib-typeahead-loading="loadingUsers"></input>
+                                            <span class="help-block"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-offset-2 col-md-4">
+                                        <label class="control-label">What type of account?</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group" style="width:100%;">
+                                            <select class="form-control" ng-model="account.category">
+                                                <option value="1">Checking</option>
+                                                <option value="2">Savings</option>
+                                                <option value="3">Certificate of Deposit (CD)</option>
+                                            </select>
+                                            <span class="help-block"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-offset-2 col-md-4">
+                                        <label class="control-label">How much is in this account?</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input class="form-control" type="number" min="0" step="any" ng-model="account.amount"></input>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-offset-2 col-md-4">
+                                        <label class="control-label">What is the annual interest rate?</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <input class="form-control" type="number" min="0" step="any" ng-model="account.interest_rate"></input>
+                                            <span class="input-group-addon">%</span>
+                                        </div>
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-wizard btn-sm btn-next" ng-click="addPropertyData($event, applicant.properties[0], account)">Next &raquo;</button>
+                                </div>
+                            </div>
+                            <div class="other" style="display:none;">
+                                <h4>Did you save part of the sales proceeds in another bank account?</h4>
+                                <div style="margin-bottom: 15px;">
+                                    <div class="btn-group">
+                                        <button class="btn btn-wizard btn-yes" ng-click="addPropertyAccount($event, applicant.properties[0])">Yes</button>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-wizard btn-no" ng-click="showPropertyCashValue($event, applicant.properties[0])">No</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="other" style="margin: 15px;display: none;">
+                            $[[cashValueOfProperty(applicant.properties[0])]] will be added to your assets <button class="btn btn-wizard btn-sm btn-next" ng-click="gotoStep($event)">Correct &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="fiduciaries" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container">
+            <h2>Do you have an account at a financial institution (Bank, Broker, etc.)?</h2>
+            {% if financial_accounts %}
+            <div>
+              The household already reported that
+              <ul>
+              {% for account in financial_accounts %}
+              <li>{{account.question.title}} {{account.source}}: {{account.amount|humanize_money}} </li>
+              {% endfor %}
+              </ul>
+              Click <em>Yes</em> to add an account not mentionned above.
+              Click <em>No</em> otherwise.
+            </div>
+            {% endif %}
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="addSource($event, applicant.fiduciaries)">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="fiduciaries-[[$index]]" class="information" ng-repeat="source in applicant.fiduciaries">
+                <div class="wizard-item">
+                    <div class="text-right">
+                        <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.fiduciaries, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                    </div>
+                    <div role="form">
+                        <h3>What is the name of the financial institution?</h3>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xs-offset-2 col-xs-6">
+                                    <input class="form-control"
+                                           name="fiduciaries-[[$index]]-source"
+                                           type="text" ng-model="source.name"
+                                           placeholder="Bank Name"
+                                           uib-typeahead="bank.name for bank in getBanks($viewValue)"
+                                           uib-typeahead-loading="loadingUsers"></input>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4">
+                                    <button class="btn btn-wizard btn-to-accounts" style="margin:0;" ng-click="addSourceAssets($event, applicant.fiduciaries, BANK_CATEGORY, {interest_rate: 0})">Next &raquo;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="source.assets.length > 0">
+                        <div role="form" class="form-inline text-left">
+                            <div class="row">
+                                <div class="col-xs-offset-4 col-xs-4">
+                                    <p>Cash Value</p>
+                                </div>
+                                <div class="col-xs-4">
+                                    <p>Annual Interest Rate</p>
+                                </div>
+                            </div>
+                            <div class="row" ng-repeat="account in source.assets">
+                                <div class="col-xs-4 text-right">
+                                    <div class="input-group">
+                                        <label class="control-label" for="[[BANK_CATEGORY[account.category].replace(' ','-')]]-amount" style="padding-top:6px;">[[BANK_CATEGORY[account.category] ]]</label>
+                                    </div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input id="[[BANK_CATEGORY[account.category].replace(' ','-')]]-amount" class="form-control" type="number" min="0" step="any" placeholder="amount" name="[[BANK_CATEGORY[account.category].replace(' ','-')]]-amount" ng-model="account.amount"></input>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="input-group">
+                                        <input class="form-control" type="number" min="0" step="any" name="[[BANK_CATEGORY[account.category].replace(' ','-')]]-interest" ng-model="account.interest_rate"></input>
+                                        <span class="input-group-addon">%</span>
+                                    </div>
+                                    <span class="help-block"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="margin-bottom: 15px;"></div>
+                <div ng-show="($index === applicant.fiduciaries.length - 1) && validFinancialAccount(source)">
+                    <div class="btn-group">
+                        <button ng-click="addSource($event, applicant.fiduciaries)" class="btn btn-default btn-sm btn-add"><i class="fa fa-plus"></i> Add another source</button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="life_insurances" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Do you have a whole life insurance policy?</h2>
+            {% if life_insurances %}
+            <div>
+              The household already reported that
+              <ul>
+              {% for policy in life_insurances %}
+              <li>{{policy.question.title}} {{policy.source}}: {{policy.amount|humanize_money}} </li>
+              {% endfor %}
+              </ul>
+              Click <em>Yes</em> to add a policy not mentionned above.
+              Click <em>No</em> otherwise.
+            </div>
+            {% endif %}
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="addSource($event, applicant.life_insurances, {assets: [{amount: 0, interest_rate: 0, question: 'life-insurance', category: OWNER}]})">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="life_insurances-[[$index]]" class="information" ng-repeat="source in applicant.life_insurances">
+                <div class="wizard-item">
+                    <div class="text-right">
+                        <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.life_insurances, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-offset-2 col-sm-4">
+                            <label class="control-label">I have a policy of</label>
+                            <div class="input-group">
+                                <span class="input-group-addon">$</span>
+                                <input class="form-control" type="number" min="0" step="any" placeholder="amount" ng-model="source.assets[0].amount"></input>
+                            </div>
+                            <span class="help-block"></span>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label class="control-label">with</label>
+                            <input class="form-control"
+                                   name="source-name"
+                                   type="text" ng-model="source.name"
+                                   placeholder="Bank Name"
+                                   uib-typeahead="bank.name for bank in getBanks($viewValue)"
+                                   uib-typeahead-loading="loadingUsers"></input>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="clearfix" style="margin-bottom: 15px;"></div>
+                    <div ng-show="($index === applicant.life_insurances.length - 1) && validFinancialAccount(source)">
+                        <div class="btn-group">
+                            <button ng-click="addSource($event, applicant.life_insurances, {assets: [{amount: 0, interest_rate: 0}]})" class="btn btn-default btn-sm btn-add"><i class="fa fa-plus"></i> Add another source</button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-wizard btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="cash-on-hand" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Do you have cash on hand?</h2>
+            {% if cash_on_hand %}
+            <div>
+              The household already reported to have a total of
+              {{cash_on_hand|humanize_money}} cash on hand.
+              Click <em>Yes</em> to report more cash on hand mentionned above.
+              Click <em>No</em> otherwise.
+            </div>
+            {% endif %}
+            <div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-yes" ng-click="showNode($event, '#cash-on-hand-amount')">Yes</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard btn-no" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+            <div id="cash-on-hand-amount" class="information" style="display:none;">
+                <div role="form" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label">I have in cash: </label>
+                    </div>
+                    <div class="col-md-offset-4 col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">$</span>
+                            <input class="form-control" type="number" min="0" step="any" placeholder="amount" ng-model="applicant.cash_on_hand.amount"></input>
+                        </div>
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="clearfix form-group"></div>
+                    <div>
+                        <button class="btn btn-wizard btn-sm btn-next" ng-click="gotoStep($event)">Next &raquo;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="housing-history" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>Where did you live in the past 2 years?</h2>
+            <p>(From [[housingHistoryLowerBound()]] until now)</p>
+            <div>
+                <div class="text-left wizard-item array-item" ng-repeat="pastAddress in applicant.past_addresses">
+                    <div class="text-right">
+                        <button class="btn btn-trash" ng-click="removeAtIndex($event, applicant.past_addresses, $index)"><i class="fa fa-trash fa-2x"></i> Remove</button>
+                    </div>
+                    <div class="col-sm-4">
+                        <div>
+                            {% include "tcapp/_angular_date_field.html" with label="From" field="pastAddress.starts_at" %}
+                        </div>
+                        <div>
+                            {% include "tcapp/_angular_date_field.html" with label="To" field="pastAddress.ends_at" %}
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        {% include "tcapp/_address_js.html" with address="pastAddress" %}
+                    </div>
+                    <div class="clearfix form-group"></div>
+                </div>
+                <div>
+                    <div class="btn-group">
+                        <button class="btn btn-default btn-sm btn-add" ng-click="addPastAddress(applicant.past_addresses, $event)"><i class="fa fa-plus"></i> Add another address</button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-wizard" ng-click="gotoStep($event)">Next &raquo;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ssn" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>What is your Social Security number?</h2>
+            <p>
+We will need your Social Security number (SSN) to verify the information you
+provided here with 3rd party.
+            </p>
+            <div role="form">
+                <div class="col-md-offset-3 col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">
+                            Social Security Number <i>(optional)</i>
+                        </label>
+                        <div class="controls">
+                            <input class="form-control" maxlength="50" type="text" ng-model="applicant.ssn">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix form-group"></div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard" ng-click="gotoStep($event)">Next &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="contact" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/71401718@N00/3228369950">After global warming, Tibetan style living room, red sofa, red Chinese chairs, blue Tibetan carpets, photo of Dilgo Khyentse Rinpoche on laptop, chest, San Mateo, California, USA</a>> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container trigger">
+            <h2>How can we contact you?</h2>
+            <div role="form">
+                <div class="col-sm-offset-3 col-sm-6">
+                    <div class="form-group">
+                        <label class="control-label">
+                            Email
+                        </label>
+                        <div class="controls">
+                            <input class="emailinput form-control" maxlength="75" name="email" type="email" ng-model="applicant.email">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">
+                            Phone
+                        </label>
+                        <div class="controls">
+                            <input class="form-control" maxlength="50" name="phone" type="text" ng-model="applicant.phone">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix form-group"></div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard" ng-click="gotoStep($event)">Next &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="demographic" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <div class="content-inner container trigger">
+            <h2>Could you help us maintain a fair application process?</h2>
+            <p>
+Although the <a href="http://www.treasurer.ca.gov/ctcac/" target="_blank">CTCAC</a>
+would appreciate receiving this information, you may choose
+not to furnish it. You will not be discriminated against on the basis
+of this information, or on whether or not you choose to furnish it.
+            </p>
+            <div role="form">
+                <div class="col-md-offset-2 col-md-8">
+                    <div class="form-group">
+                        <label class="control-label">Race</label>
+                        <div class="controls">
+                            <select class="select form-control" ng-model="applicant.race">
+                                <option value="" disabled selected>Please choose one ...</option>
+                                <option value="1">White</option>
+                                <option value="2">Black / African American</option>
+                                <option value="4">American Indian / Alaska Native</option>
+                                <option value="8">Asian</option>
+                                <option value="16">Native Hawaiian / Other Pacific Islander</option>
+                                <option value="32">Other</option>
+                                <option value="64">Did not respond</option>
+                            </select>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Ethnicity</label>
+                        <div class="controls">
+                            <select class="select form-control" ng-model="applicant.ethnicity">
+                                <option value="" disabled selected>Please choose one ...</option>
+                                <option value="1">Hispanic</option>
+                                <option value="2">Not Hispanic</option>
+                                <option value="3">Did not respond</option>
+                            </select>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Disabled</label>
+                        <div class="controls">
+                            <select class="select form-control" ng-model="applicant.disabled">
+                                <option value="" disabled selected>Please choose one ...</option>
+                                <option value="1">Yes</option>
+                                <option value="2">No</option>
+                                <option value="3">Did not respond</option>
+                            </select>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix form-group"></div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard" ng-click="gotoStep($event, '#more-tenants')">Next &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<div id="more-tenants" class="wizard-step">
+    <div class="wizard-content" style="background-color: #5b9fc1;">
+        <div class="content-inner container trigger">
+            <h2>Will there be another adult accoupying the unit?</h2>
+            <div ng-if="application.applicants.length > 0">
+The following applicants are already listed:
+<ul class="list-unstyled" ng-repeat="applicant in application.applicants">
+    <li>[[applicant.full_name ? applicant.full_name : "unnamed"]] [[applicant.relation_to_head ? applicant.relation_to_head : "unknown relation"]]</li>
+</ul>
+            </div>
+            <div>
+                <div class="btn-group">
+                    <button id="add-tenant" class="btn btn-wizard" ng-click="addApplicationTenant($event)"><i class="fa fa-plus"></i> Add tenant</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-wizard" ng-click="gotoStep($event)">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="final" class="wizard-step">
+    <div class="wizard-content" style="background-image: url({% static 'img/bedroom-30.jpg' %});">
+        <!-- photo credit: <a href="http://www.flickr.com/photos/25186605@N04/6903416326">Master Bedroom and Bath 5</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a> -->
+        <div class="content-inner container">
+            <h2>Thank You. Let's now estimate the total household income for you.</h2>
+            <div class="row">
+                <div class="col-sm-offset-2 col-sm-8">
+                    <p>
+After all income and asset information has been obtained and calculated,
+all qualified sources of income are added to derive the total household income.
+In order for the household to qualify for a tax credit unit, the total
+household income must be less than or equal to the maximum allowable qualifying
+income for household size in effect at the time of tenant certification. If the
+total household income is greater than the maximum allowable qualifying income,
+the household cannot be certified for a tax credit unit.
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-offset-3 col-sm-6">
+                    <p>
+By clicking the button below, under penalties of perjury I declare that I have
+reviewed the information provided and to the best of my knowledge and belief it
+is true, correct, and complete.
+                    </p>
+                </div>
+            </div>
+            <button id="fill-application-submit" class="btn btn-wizard"
+                    ng-click="completeApplication('{% url 'application_wizard' lihtc_property %}')">
+                {% if lihtc_property_signed_up %}
+                Fill Application
+                {% else %}
+                Get Estimates
+                {% endif %}
+            </button>
+        </div>
+    </div>
+</div>
+</form>
+          </div>
+        </div>
+  </div>
+</body>
+</html>
+
+{% block bodyscripts %}
+{% assets "js_angular" %}
+<script type="text/javascript" src="{{ASSET_URL}}"></script>
+{% endassets %}
+{% assets "js_tcapp" %}
+<script type="text/javascript" src="{{ASSET_URL}}"></script>
+{% endassets %}
+<script type="text/javascript">
+/* Implementation Note: Not including a list of dependent modules
+   (2nd parameter to `module`) "re-opens" the module for additional
+   configuration. */
+var app = angular.module('tcappApp');
+/* Add the CSRF Token: */
+app.config(['$interpolateProvider', '$httpProvider',
+           function($interpolateProvider, $httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{csrf_token|escapejs}}';
+    /* Makes it easier to separate between django and angularjs templates */
+    $interpolateProvider.startSymbol('[[');
+    $interpolateProvider.endSymbol(']]');
+}]);
+app.constant('settings', {
+    lihtcProperty: "{{lihtc_property}}",
+    fields: {}, limits: {},
+});
+</script>
+<script type="text/ng-template" id="customTemplate.html">
+  <a><span bind-html-unsafe="match.model.email | typeaheadHighlight:query"></span>
+  </a>
+</script>
+{% endblock %}
+

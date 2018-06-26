@@ -1,0 +1,80 @@
+{% extends "tcapp/tenant/income/index.html" %}
+
+{% block tenant_income_group_amounts %}
+<legend>Amounts</legend>
+<div id="incomes-[[$index]]" ng-repeat="income in source.incomes">
+    <div class="row">
+        <div class="col-xs-4 no-padding-right">
+            <div class="input-group">
+                <span class="input-group-addon">$</span>
+                <input id="Amount" class="form-control" maxlength="50" name="{{entry_slug}}-[[$parent.index]]-[[$index]]-amount" type="text" ng-model="income.amount"></input>
+            </div>
+            <span class="help-block"></span>
+        </div>
+        <div class="col-xs-4 no-padding" ng-show="!hasImplicitPeriod(source)">
+            <select class="select form-control" id="id_period" name="period" ng-model="income.period" ng-change="periodUpdated(income)">
+                {% with bogus|income_periods as income_periods_dict %}
+                {% for option_key, option_value in income_periods_dict.items %}
+                <option value="{{option_key}}">{{option_value}}</option>
+                {% endfor %}
+                {% endwith %}
+            </select>
+            <span class="help-block"></span>
+        </div>
+        <div class="form-group col-xs-4 no-padding-left" ng-show="!hasImplicitPeriod(source)">
+            <div class="input-group">
+                <input name="{{entry_slug}}-[[$parent.index]]-[[$index]]-avg_per_year" class="form-control" type="number" min="0" step="any" placeholder="[[asPeriodNouns(income.period)]]" ng-model="income.avg_per_year"></input>
+                <span class="input-group-addon">[[asPeriodNouns(income.period)]]/year</span>
+            </div>
+            <span class="help-block"></span>
+        </div>
+    </div>
+    <legend>Additional information</legend>
+    <div class="row form-group">
+        <div class="col-xs-4">
+            <label class="control-label">How is payment received?</label>
+        </div>
+        <div class="col-xs-4 no-padding-right">
+            <select class="select form-control" ng-model="income.payer">
+                <option value="" disabled selected>Please choose one ...</option>
+                <option value="Enforcement agency">Enforcement agency</option>
+                <option value="Court of Law">Court of Law</option>
+                <option value="Direct from responsible party">Direct from responsible party</option>
+                <option value="Other">Other</option>
+            </select>
+            <span class="help-block"></span>
+        </div>
+        <div class="col-xs-4 no-padding-left">
+            <input class="form-control" maxlength="50" type="text" placeholder="agency name" ng-model="source.position" />
+            <span class="help-block"></span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-4">
+            <label class="control-label">What are these payments for?</label>
+        </div>
+        <div class="col-xs-4 no-padding-right">
+            <select class="select form-control" name="category" ng-model="income.category">
+                <option value="" disabled selected>Please choose one ...</option>
+                <option value="child support">Child Support</option>
+                <option value="spousal support">Spousal Support</option>
+            </select>
+            <span class="help-block"></span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-4">
+            <label class="control-label">Amount awarded by court order?</label>
+        </div>
+        <div class="col-xs-4 no-padding-right">
+            <select class="select form-control" name="court_award" ng-model="income.court_award">
+                <option value="" disabled selected>Please choose one ...</option>
+                <option value="yes">Yes (receive full amount)</option>
+                <option value="partial">Yes (receive only partial amount)</option>
+                <option value="no">No</option>
+            </select>
+            <span class="help-block"></span>
+        </div>
+    </div>
+</div>
+{% endblock %}

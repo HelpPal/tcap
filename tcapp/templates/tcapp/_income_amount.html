@@ -1,0 +1,107 @@
+<div class="row">
+    <div class="col-sm-4">
+        <div class="form-group{% if errors.amount %} has-error{% endif %}" id="div_id_amount">
+            <label class="control-label requiredField" for="id_amount">
+                Amount
+            </label>
+            <div class="controls">
+                <div class="input-group">
+                    <span class="input-group-addon">$</span>
+                    <input class="numberinput form-control" id="id_amount" name="amount" step="any" type="number" ng-model="income.amount">
+                </div>
+            </div>
+            {% for error in errors.amount %}
+            <p class="help-block"><strong>{{error}}</strong></p>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group{% if errors.period %} has-error{% endif %}" id="div_id_period">
+            <label class="control-label" for="id_period">
+                Period
+            </label>
+            <div class="controls">
+                <select class="select form-control" id="id_period" name="period" ng-model="income.period" ng-disabled="periodSelectDisabled(income)">
+                    {% with bogus|income_periods as income_periods_dict %}
+                    {% for option_key, option_value in income_periods_dict.items %}
+                    <option value="{{option_key}}">{{option_value}}</option>
+                    {% endfor %}
+                    {% endwith %}
+                </select>
+            </div>
+            {% for error in errors.period %}
+            <p class="help-block"><strong>{{error}}</strong></p>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group{% if errors.avg_per_year %} has-error{% endif %}" id="div_id_avg_per_year">
+            <label class="control-label " for="id_avg_per_year">
+                [[naturalPerYear(income.period)]]
+            </label>
+            <div class="controls" style="color:red;">
+                <input class="numberinput form-control" id="id_avg_per_year" name="avg_per_year" type="number" min="0" ng-attr-max="naturalAvgPerYear(income.period)" step="0.01" ng-model="income.avg_per_year">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" id="ytd">
+    <div class="col-sm-offset-4 col-sm-4" id="period" ng-show="income.period == HOURLY || income.period == DAILY">
+        <div class="form-group{% if errors.period_per_avg %} has-error{% endif %}" id="div_id_period_per_avg">
+            <label class="control-label " for="id_period_per_avg">
+                [[periodPerNatural(income.period)]]
+            </label>
+            <div class="controls">
+                <input class="numberinput form-control" id="id_period_per_avg" name="period_per_avg" step="any" type="number" ng-model="income.period_per_avg">
+            </div>
+            {% for error in errors.period_per_avg %}
+            <p class="help-block"><strong>{{error}}</strong></p>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-sm-offset-4 col-sm-8" ng-show="income.period == OTHER">
+        <div>
+            <div class="col-sm-6">
+                <div class="form-group{% if errors.starts_at %} has-error{% endif %}" id="div_id_starts_at">
+                    <label class="control-label" for="id_starts_at">
+                        From
+                    </label>
+                    <p class="input-group">
+                        <input class="datetimeinput form-control" close-text="Close" datepicker-options="dateOptions" uib-datepicker-popup="[[format]]" id="id_starts_at" is-open="opened.starts_at" name="starts_at" ng-model="income.starts_at" type="text" placeholder="MM-DD-YYYY">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" ng-click="openDatePicker($event, 'starts_at')" type="button">
+                                <i class="fa fa-calendar"></i>
+                            </button>
+                        </span>
+                    </p>
+                    <p>(MM-DD-YYYY)</p>
+                    {% for error in errors.starts_at %}
+                    <p class="help-block"><strong>{{error}}</strong></p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group{% if errors.ends_at %} has-error{% endif %}" id="div_id_ends_at">
+                    <label class="control-label" for="id_ends_at">
+                        To
+                    </label>
+                    <p class="input-group">
+                        <input class="datetimeinput form-control" close-text="Close" datepicker-options="dateOptions" uib-datepicker-popup="[[format]]" id="id_ends_at" is-open="opened.ends_at" name="ends_at" ng-model="income.ends_at" type="text" placeholder="MM-DD-YYYY">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" ng-click="openDatePicker($event, 'ends_at')" type="button">
+                                <i class="fa fa-calendar"></i>
+                            </button>
+                        </span>
+                    </p>
+                    <p>(MM-DD-YYYY)</p>
+                    {% for error in errors.ends_at %}
+                    <p class="help-block"><strong>{{error}}</strong></p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <span style="font-size:0.8em;">[[nbDays(income)]] days</span>
+        </div>
+    </div>
+</div>

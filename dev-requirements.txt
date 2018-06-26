@@ -1,0 +1,14 @@
+# Direct known Python requirements for debugging
+django-debug-panel==0.8.3
+django-debug-toolbar==1.8
+django-extensions==1.8.0
+Fabric==1.10.1
+pip-tools==0.3.5
+pylint-django==0.6
+pylint==1.4.1
+Sphinx==1.2.3
+sphinxcontrib-httpdomain==1.3.0
+# required by django-debug-toolbar without being a prerequisite
+sqlparse==0.1.14
+#with C++ module
+#coverage==3.7.1

@@ -1,0 +1,7 @@
+<select class="select form-control" type="number" name="{{name}}" ng-model="{{ng_model}}">
+    {% with bogus|income_periods as income_periods_dict %}
+    {% for option_key, option_value in income_periods_dict.items %}
+    <option value="{{option_key}}">{{option_value}}</option>
+    {% endfor %}
+    {% endwith %}
+</select>

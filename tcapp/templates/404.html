@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-8 text-center" style="margin-top: 50px;">
+            <p>
+                <i class="fa fa-meh-o fa-4x"></i> 404 - Not Found
+            </p>
+            <p>
+Sorry, the page <strong>{{request_path}}</strong> could not be found.
+            </p>
+            <p>
+If you think there is a mistake, please
+<a href="mailto:support@teacapp.co">contact us</a>.
+            </p>
+            <p>
+We do our best to reply within 24 hours. Thank you!
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

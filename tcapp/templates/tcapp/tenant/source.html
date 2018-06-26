@@ -1,0 +1,73 @@
+{% extends "tcapp/tenant/base.html" %}
+
+{% block tenant_certification %}
+<div class="col-sm-offset-2 col-sm-8 tic-Income">
+    <h1 class="text-center">
+        <i class="fa fa-user"></i> Tenant Income Source
+    </h1>
+    <h4 class="text-center">(One Form per Adult Member of the Household)</h4>
+    <form action=".{% if next %}/?next={{next}}{% endif %}" method="post">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Source to verifiy details with ...</legend>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group{% if form.position.errors %} has-error{% endif %}" id="div_id_position">
+                        <label class="control-label requiredField" for="id_position">
+                            Position/Job title (if applicable)
+                        </label>
+                        <div class="controls">
+                            <input class="form-control form-control" id="id_position" name="position" type="text" {% if form.position.value %}value="{{form.position.value}}"{% endif %}>
+                        </div>
+                        {% include "bootstrap3/layout/help_text_and_errors.html" with field=form.position form_show_errors=True %}
+                    </div>
+                </div>
+                <div class="col-sm-4 text-center">
+at
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group{% if form.name.errors %} has-error{% endif %}" id="div_id_name">
+                        <label class="control-label requiredField" for="id_name">
+                            Name
+                        </label>
+                        <div class="controls ">
+                            <input class="form-control" id="id_name" name="name" type="text" {% if form.name.value %}value="{{form.name.value}}"{% endif %}>
+                        </div>
+                        {% include "bootstrap3/layout/help_text_and_errors.html" with field=form.name form_show_errors=True %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group{% if form.email.errors %} has-error{% endif %}" id="div_id_email">
+                        <label class="control-label requiredField" for="id_email">
+                            Contact Email
+                        </label>
+                        <div class="controls">
+                            <input class="emailinput form-control" id="id_email" name="email" type="email" {% if form.email.value %}value="{{form.email.value}}"{% endif %}>
+                        </div>
+                        {% include "bootstrap3/layout/help_text_and_errors.html" with field=form.email form_show_errors=True %}
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group{% if form.phone.errors %} has-error{% endif %}" id="div_id_phone">
+                        <label class="control-label requiredField" for="id_phone">
+                            Contact Phone
+                        </label>
+                        <div class="controls ">
+                            <input class="form-control" id="id_phone" name="phone" type="text" {% if form.phone.value %}value="{{form.phone.value}}"{% endif %}>
+                        </div>
+                        {% include "bootstrap3/layout/help_text_and_errors.html" with field=form.phone form_show_errors=True %}
+                    </div>
+                </div>
+            </div>
+            {% include "tcapp/_address_js.html" with address="activeApplicant.income.source" errors=form.errors %}
+        </fieldset>
+        <div class="form-group text-center">
+            <div class="controls">
+                <button class="btn btn-primary" name="submit" type="submit">{% if form.instance.pk %}Update{% else %}Next &raquo;{% endif %}</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

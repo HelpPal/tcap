@@ -1,0 +1,185 @@
+{% extends "tcapp/base.html" %}
+{% load tcapptags %}
+
+{% block tcapp_content %}
+<div class="container">
+    {% for account, values in by_accounts.items %}
+    {% with values.project as project %}
+    <div>
+        <div class="page-header">
+            <h2>{{project.name}}</h2>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <p>
+                    <a href="{% url 'project_detail' project %}">{{project.tcac_number}}</a>
+                </p>
+                <p>
+                    <span class="adr">
+                        <span class="street-address">{{project.street_address}}</span><br />
+                        <span class="locality">{{project.locality}}</span><br />
+                        <abbr class="region" title="{{project.county.region}}">{{project.county.region}}</abbr>
+                        <span class="postal-code">{{project.postal_code}}</span><br />
+                        <span class="country-name">{{project.country.name}}</span>
+                    </span>
+                </p>
+            </div>
+            <div class="col-sm-8">
+                <p class="text-left">
+                    <a id="new-appplication-{{project.tcac_number}}"
+                       class="new-application"
+                       data-toggle="modal" data-target="#new-application"
+                       data-project="{{account}}">https://www.teacapp.co{% url 'application_wizard' project %}</a>
+                </p>
+                <p class="text-left">
+<a href="mailto:?subject=Please fill your income estimates for next year&body=Hi,%0D%0A%0D%0AWe need to gather income estimates in order to pre-qualify you as a LIHTC tenant under CTCAC rules. Please fill your income estimates for next year at%3A%0D%0A%0D%0A    https://www.teacapp.co{% url 'application_wizard' project %}.%0D%0A%0D%0AThank you,%0D%0A{{project.name}} Team" class="btn btn-primary">Share the link</a> above with prospective tenants and start pre-screening now.
+                </p>
+            </div>
+        </div>
+        <div ng-controller="tcappApplicationListCtrl"
+             data-api-url="{{project.urls.api.applications}}"
+             data-autoload="true">
+            <table class="table">
+                <tr>
+                    <td colspan="3">
+                        <label>Filter</label> <input type="text" ng-model="filterExpr" ng-change="filterList(filterExpr)" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>Application date<button class="btn-link btn-sort" ng-click="sortBy('created_at')"><i class="fa fa-sort[[dir.created_at ? ('-' + dir.created_at) : '']]"></i></button></th>
+                    <th>Head of household</th>
+                    <th>Status<button class="btn-link btn-sort" ng-click="sortBy('status')"><i class="fa fa-sort[[dir.status ? ('-' + dir.status) : '']]"></i></button></th>
+                    <th>Unit Number<button class="btn-link btn-sort" ng-click="sortBy('unit_number')"><i class="fa fa-sort[[dir.unit_number ? ('-' + dir.unit_number) : '']]"></i></button></th>
+                </tr>
+                <tr ng-hide="items.$resolved">
+                    <td colspan="3">
+                        <h3  class="text-center"><i class="fa fa-refresh fa-spin fa-2x"></i></h3>
+                    </td>
+                </tr>
+                <tr ng-show="items.$resolved && items.results.length == 0">
+                    <td colspan="3">
+                        <h4 class="text-center"><em>No Application<span ng-show="filterExpr"> [[filterExpr]]</span></em></h4>
+                    </td>
+                </tr>
+                <tr ng-show="items.$resolved && items.results.length > 0" ng-repeat="application in items.results" class="[[application.status == 0 ? 'recent' : '']]" ng-cloak>
+                    <td>[[application.created_at| date : mediumDate]]</td>
+                    <td><a href="{{urls.applications}}{{project}}/[[application.slug]]/calculation/">[[application.printable_name]]</a></td>
+                    <td>
+                        <select name="status" class="form-control input-sm"
+                                ng-model="application.status"
+                                ng-change="updateStatus(application)">
+                            {% for status in statuses %}
+                            <option value="{{status.0}}">{{status.1}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        [[application.unit_number]]
+                    </td>
+                </tr>
+<!--
+                <tr>
+                    <td colspan="3">
+                        <a class="btn btn-default" href="{% url 'income_report' project %}" target="_blank">Income Report</a>
+                    </td>
+                </tr>
+-->
+            </table>
+            <div class="text-center">
+                <uib-pagination ng-model="currentPage"
+                                total-items="totalItems"
+                                items-per-page="itemsPerPage"
+                                boundary-links="true"
+                                num-pages="maxSize"
+                                previous-text="&lsaquo;"
+                                next-text="&rsaquo;"
+                                first-text="&laquo;"
+                                last-text="&raquo;"
+                                ng-change="pageChanged()"
+                                ng-show="items.$resolved && items.results.length > 0"></uib-pagination>
+            </div>
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div class="row">
+            <div class="col-sm-offset-2 col-sm-8 text-justify" style="margin-top: 50px;">
+                <p>
+Thank you for registering with TeaCapp, your TIC solution.
+                </p>
+                <p>
+For security purposes, TeaCapp Support will contact you
+to validate your property and identity within 24 hours.
+                </p>
+                <p>
+In the meantime, you can search for your property and check the
+<a href="{% url 'project_search' %}">current income and rent limits &raquo;</a>
+                </p>
+                <div class="vcard text-center">
+                    <div style="margin: 50px 0 15px 0;">
+            To contact us
+                    </div>
+                    <dl>
+                        <dt>Email</dt><dd><a class="email" href="mailto:support@teacapp.co">support@teacapp.co</a></dd>
+                    </dl>
+                    <dl>
+                        <dt>Phone</dt><dd><a class="tel" href="tel:17084622842">+1 (708) 462-2842</a></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- modal dialog for "New Application" -->
+    <div id="new-application" class="modal fade"
+         tabindex="-1" role="dialog" aria-labelledby="New Application"
+         aria-hidden="true">
+        {% csrf_token %}
+        <input type="hidden" maxlength="13" name="project">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close"
+                            data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">New Application ...</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+You will be automatically logged out and a wizard page will appear
+for a prospective tenant to enter personal information, income,
+assets, etc.
+                    </p>
+                    <p>
+Once the prospective tenant has completed the wizard, you should
+log back in, review the application, ask for proper documentation
+from the prospective tenants and have them sign the release forms
+for 3rd party verification.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">Cancel</button>
+                    <a id="new-application-submit"
+                       class="btn btn-primary"
+                       href="">New Application &raquo;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of modal dialog for "New Application" -->
+</div>
+{% endblock %}
+
+{% block bodyscripts %}
+{{block.super}}
+<script type="text/javascript">
+$(document).ready(function() {
+    $(".new-application").click(function () {
+        var self = $(this);
+        $("#new-application-submit").attr("href",
+            /* url 'application_wizard' project */
+            "{{urls.projects}}" + self.attr("data-project") + "/application/");
+    });
+});
+</script>
+{% endblock %}

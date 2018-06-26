@@ -1,0 +1,28 @@
+{% extends "notification/base.eml" %}
+
+{% block subject %}
+New application from {{application.printable_name}} | TeaCapp
+{% endblock %}
+
+{% block html_content %}
+<p>
+Congratulations, your marketing efforts are paying off!
+</p>
+<p>
+<a href="{{back_url}}">{{application.printable_name}}</a> has expressed
+an interest to apply for residence at {{site.printable_name}}
+under the LIHTC tenant rules.
+</p>
+<p>
+View the information submitted by clicking on the following link,
+or copy/paste, the following URL in your browser:
+</p>
+<p>
+{{back_url}}
+</p>
+<p style="margin-top:25px;">
+Thank you for making housing affordable in California. If you have any questions
+or comments, email us at <a href="mailto:{{provider.email}}">{{provider.email}}</a>
+or call us at <a href="tel:{{provider.phone}}">{{provider.phone}}</a>.
+</p>
+{% endblock %}

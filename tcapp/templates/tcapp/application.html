@@ -1,0 +1,1064 @@
+{% extends "tcapp/application_base.html" %}
+{% load assets %}
+{% load tcapptags %}
+
+{% block application_content %}
+<div class="col-sm-12">
+<form method="post" action=".">
+{% csrf_token %}
+{% with form_show_labels=True form_show_errors=True %}
+  <section id="tenant-income-certification">
+    <h1>Tenant Income Certification</h1>
+    <div class="row">
+        <div class="col-sm-12">
+        <div class="form-group{% if form.certification_type.errors %} has-error{% endif %}">
+            <div class="controls">
+                <label for="initial_certification" class="radio-inline">
+                    <input id="initial_certification" type="radio"
+                    {% if form.instance.certification_type == 'initial' %}
+                           checked="checked"
+                    {% endif %}
+                           name="certification_type" value="initial"
+                           ng-click="other_certification_text = '';" />
+                    Initial Certification</label>
+                <label for="recertification" class="radio-inline">
+                    <input id="recertification" type="radio"
+                    {% if form.instance.certification_type == 'recertification' %}
+                           checked="checked"
+                    {% endif %}
+                           name="certification_type" value="recertification"
+                           ng-click="other_certification_text = '';" />
+                    Recertification</label>
+                <label for="other_certification" class="radio-inline">
+                    <input id="other_certification" type="radio"
+{% if  form.instance.is_other_certification %}checked="checked"{% endif %}
+                           ng-checked="is_other_certification()"
+                           name="certification_type" ng-value="other_certification_text" />
+                    Other:
+                    <input id="other_certification_text" type="input"
+                           ng-model="other_certification_text" />
+                </label>
+            </div>
+        </div>
+        <p class="help-text">
+Enter the type of tenant certification: Initial Certification (move-in), Recertification (annual recertification), or Other. If other, designate the purpose of the recertification (i.e., a unit transfer, a change in household composition, or other state-required recertification).
+        </p>
+        </div>
+    </div>
+    <div class="row">
+    <div class="col-sm-6">
+        <dl>
+            <dt>Effective Date:</dt>
+            <dd>
+                <p class="input-group">
+                    <input id="effective-date" type="text" class="form-control" name="effective_date" uib-datepicker-popup="[[format]]" ng-model="effectiveDate.val" is-open="effectiveDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Close" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open($event, effectiveDate)"><i class="fa fa-calendar"></i></button>
+                    </span>
+                </p>
+                <p>(MM-DD-YYYY)</p>
+            </dd>
+            <p class="help-text">
+Enter the effective date of the certification. For move-in, this should be
+the move-in date. For annual income recertification's, this effective date
+should be no later than one year from the effective date of the previous
+(re)certification.
+            </p>
+        </dl>
+    </div>
+    <div class="col-sm-6">
+        <dl>
+            <dt>Move-in Date:</dt>
+            <dd>
+                <p class="input-group">
+                    <input id="move-in-date" class="form-control" type="text" name="move_in_date" uib-datepicker-popup="[[format]]" ng-model="moveInDate.val" is-open="moveInDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Close" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open($event, moveInDate)"><i class="fa fa-calendar"></i></button>
+                    </span>
+                </p>
+                <p>(MM-DD-YYYY)</p>
+            </dd>
+            <p class="help-text">
+Enter the most recent date the household tax credit qualified. This could
+be the move-in date or in an acquisition rehab property, this is not the
+date the tenant moved into the unit, it is the most recent date the management
+company income qualified the unit for tax credit purposes.
+            </p>
+        </dl>
+    </div>
+</section>
+
+<section id="part-1">
+    <h2>PART I - DEVELOPMENT DATA</h2>
+    <!-------------------------------->
+    <div class="row">
+        <div class="col-md-3">
+            <dl>
+                <dt>Property Name:</dt>
+                <dd>{{form.instance.lihtc_property.name}}</dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl>
+                <dt>County:</dt>
+                <dd>{{form.instance.lihtc_property.county}}</dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl>
+                <dt>TCAC#:</dt>
+                <dd>{{form.instance.lihtc_property.tcac_number}}</dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl>
+                <dt>BIN#:</dt>
+                <dd>{{form.instance.lihtc_property.bin_number}}</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <dl>
+                <dt>Address:</dt>
+                <dd>{{form.instance.lihtc_property.street_address}}, {{form.instance.lihtc_property.region}} {{form.instance.lihtc_property.postal_code}}</dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl>
+                <dt>If applicable, CDLAC#:</dt>
+                <dd>{{form.instance.lihtc_property.cdlac_number}}</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <dl>
+                <dd>
+{% include "bootstrap3/field.html" with field=form.unit_number %}
+                </dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl>
+                <dd>
+{% include "bootstrap3/field.html" with field=form.nb_bedrooms %}
+                </dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl>
+                <dd>
+{% include "bootstrap3/field.html" with field=form.square_footage %}
+                </dd>
+            </dl>
+        </div>
+    </div>
+</section>
+
+<section id="part-2">
+    <h2>PART II - HOUSEHOLD COMPOSITION</h2>
+    <!------------------------------------>
+    <div>
+{% include "bootstrap3/field.html" with field=form.household_vacant %}
+Vacant (Check if unit was vacant on December 31 of the Effective Date Year)
+      <p class="help-text">
+Check if the unit was vacant on December 31st of requesting year.
+For example, for the collection of 2011 data, this would refer to December
+31st, 2011.
+      </p>
+    </div>
+    <table class="table">
+        <tr>
+            <th>HH Mbr#</th>
+            <th>Last Name</th>
+            <th>First Name</th>
+            <th>Middle Initial</th>
+            <th>Relation to Head of Household</th>
+            <th>Date of Birth (MM/DD/YYYY)</th>
+            <th>F/T Student (Y or N)</th>
+            <th>Last 4 digits of Social Security #</th>
+        </tr>
+        {% for applicant in application.residents %}
+        <tr>
+            <td><a href="{% url 'resident_update' application.lihtc_property applicant.resident %}">{{forloop.counter}}</a></td>
+            <td>{{applicant.resident.last_name}}</td>
+            <td>{{applicant.resident.first_name}}</td>
+            <td>{% if applicant.resident.middle_initial %}{{applicant.resident.middle_initial}}{% endif %}</td>
+            <td>{{applicant.get_relation_to_head_display}}</td>
+            <td>{{applicant.resident.date_of_birth|date:"SHORT_DATE_FORMAT"}}</td>
+            <td>{% if applicant.resident.full_time_student %}Y{% else %}N{% endif %}</td>
+            <td>{{applicant.resident.ssn_last4}}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="8"><a id="add-resident" href="{{application_resident_add}}">Add resident ...</a></td>
+        </tr>
+    </table>
+    <p class="help-text">
+For each tenant 15 years of age or older, enter the last four digits of the
+social security number or the last four digits of the alien registration
+number. If the last four digits of SSN or alien registration is missing,
+enter 0000. For tenants under age 15, social security number not required,
+although please enter 0000.
+    </p>
+</section>
+
+<section id="part-3">
+    <h2>PART III - GROSS ANNUAL INCOME</h2>
+    <!------------------------------------->
+    <p class="help-text">
+See HUD Handbook 4350.3 for complete instructions on verifying and calculating
+income, including acceptable forms of verification.
+    </p>
+    <p class="help-text">
+From the third party verification forms obtained from each income source,
+enter the gross amount anticipated to be received for the twelve months
+from the effective date of the (re)certification. Complete a separate
+line for each income-earning member. List <strong>each</strong> respective
+household member from Part II. Include anticipated income only if documentation
+exists verifying pending employment. If any adult states zero-income, please
+note "zero" in the columns of Part III.
+<ul>
+<li><em>Column (A)</em> Enter the annual amount of wages, salaries, tips, commissions,
+bonuses, and other income from employment; distributed profits and/or net
+income from a business.</li>
+<li><em>Column (B)</em> Enter the annual amount of Social Security,
+Supplemental Security Income, pensions, military retirement, etc.</li>
+<li><em>Column (C)</em> Enter the annual amount of income received from
+public assistance (i.e. TANF, general assistance, disability, etc.)</li>
+<li><em>Column (D)</em>Enter the annual amount of alimony, child support,
+unemployment benefits, or any other income regularly received by the household.
+</ul>
+    </p>
+    <table class="table">
+        <tr>
+            <th>HH Mbr#</th>
+            <th class="text-center">(A) Employment or Wages</th>
+            <th class="text-center">(B) Soc. Security/Pensions</th>
+            <th class="text-center">(C) Public Assistance</th>
+            <th class="text-center">(D) Other Income</th>
+        </tr>
+        {% for applicant in application.tenants %}
+        <tr>
+            <td>
+<a id="income-{{forloop.counter}}" href="{% url 'income_verification' application.lihtc_property applicant.resident %}">{{forloop.counter}}</a>
+            </td>
+            <td class="text-right">{{applicant.resident.earned_income|humanize_money}}</td>
+            <td class="text-right">{{applicant.resident.social_security_and_pensions|humanize_money}}</td>
+            <td class="text-right">{{applicant.resident.public_assistance|humanize_money}}</td>
+            <td class="text-right">{{applicant.resident.other_income|humanize_money}}</td>
+        </tr>
+        {% endfor %}
+        <tr id="income-totals">
+            <td>Totals</td>
+            <td class="text-right">{{form.instance.earned_income|humanize_money}}</td>
+            <td class="text-right social-security-pensions">{{form.instance.social_security_and_pensions|humanize_money}}</td>
+            <td class="text-right">{{form.instance.public_assistance|humanize_money}}</td>
+            <td class="text-right">{{form.instance.other_income|humanize_money}}</td>
+        </tr>
+        <tr>
+            <td colspan="3">Add totals from (A) through (D), above</td>
+            <td>TOTAL INCOME (E)</td>
+            <td class="text-right">{{form.instance.total_income|humanize_money}}</td>
+        </tr>
+    </table>
+</section>
+
+<section id="part-4">
+    <h2>PART IV - INCOME FROM ASSETS</h2>
+    <!----------------------------------->
+    <p class="help-text">
+See HUD Handbook 4350.3 for complete instructions on verifying and calculating
+income, including acceptable forms of verification.
+    </p>
+    <p>
+From the third party verification forms obtained from each asset source, list
+the gross amount anticipated to be received during the twelve months from
+the date of the certification. If individual household member income
+is provided, list the respective household member number from Part II and
+complete a separate line for each member.
+<ul>
+<li><em>Column (F)</em> List the type of asset (i.e. checking account,
+savings account, etc.)</li>
+<li><em>Column (G)</em> Enter C (for current, if the family currently owns
+or holds the asset), or I (for imputed, if the family has disposed of the
+asset for less than fair market value within two years of the effective
+date of (re)certification.</li>
+</ul>
+    </p>
+    <table class="table">
+        <tr>
+            <th>HH Mbr#</th>
+            <th>(F) Type of Asset</th>
+            <th>(G) C/I</th>
+            <th class="text-center">(H) Cash Value of Asset</th>
+            <th class="text-center">(I) Annual Income from Asset</th>
+        </tr>
+        {% for applicant in application.tenants %}
+        {% with forloop.counter as hhmbr %}
+        {% for asset in applicant.resident.get_greater_of_assets %}
+        <tr>
+            <td>
+<a href="{% url 'assets_verification' application.lihtc_property applicant.resident %}">{{hhmbr}}</a>
+            </td>
+            <td>{{asset.question.title}}</td>
+            <td>{% if asset.is_current %}C{% else %}I{% endif %}</td>
+            <td class="text-right">{{asset.amount|humanize_money}}</td>
+            <td class="text-right">{{asset.annual_income|humanize_money}}</td>
+        </tr>
+        {% endfor %}
+        {% endwith %}
+        {% endfor %}
+        <tr>
+            <td colspan="3">TOTALS</td>
+            <td class="text-right">{{form.instance.cash_value_of_assets|humanize_money}}</td>
+            <td class="text-right">{{form.instance.annual_income_from_assets|humanize_money}}</td>
+        </tr>
+        <tr>
+            <td>Enter Column (H) Total If over $5000:
+                {% if form.instance.cash_value_of_assets > 500000 %}
+                {{form.instance.cash_value_of_assets|humanize_money}}
+                {% endif %}
+            </td>
+            <td>* Passbook Rate 0.06%</td>
+            <td colspan="2">= (J) Imputed Income</td>
+            <td class="text-right">
+                {% if form.instance.imputed_income_from_assets %}
+                {{form.instance.imputed_income_from_assets|humanize_money}}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">Enter the greater of the total of column I, or J: imputed income</td>
+            <td>TOTAL INCOME FROM ASSETS (K)</td>
+            <td class="text-right">{{form.instance.total_income_from_assets|humanize_money}}</td>
+        </tr>
+        <tr>
+            <td colspan="4">(L) Total Annual Household Income from all Sources [Add (E) + (K)]</td>
+            <td class="text-right">{{form.instance.total_annual_income|humanize_money}}</td>
+        </tr>
+    </table>
+</section>
+
+<section id="household-certification-signatures">
+    <h2>HOUSEHOLD CERTIFICATION & SIGNATURES</h2>
+    <!------------------------------------------->
+    <p class="help-text">
+The information on this form will be used to determine maximum income eligibity.
+I/we have provided for each person(s) set forth in Part II acceptable
+verification of current anticipated annual income. I/we agree to notify the
+landlord immediately upon any member of the household moving out of the unit
+or any new member moving in. I/we agree to notify the landlord immediately
+upon any member becoming a full time student.
+    </p>
+    <p>
+Under penalties of perjury, I/we certify that the information presented
+in this Certification is true and accurate to the best of my/our knowledge
+and belief. The undersigned further understands that providing false
+representations herein constitutes an act of fraud. False, misleading
+or incomplete information may result in the termination of the lease
+agreement.
+    </p>
+    {% for applicant in application.tenants %}
+    <div>
+        <dl>
+            <dt>Signature</dt>
+            <dd></dd>
+        </dl>
+        <dl>
+            <dt>Date</dt>
+            <dd></dd>
+        </dl>
+    </div>
+    {% endfor %}
+</section>
+
+<section id="part-5">
+    <h2>PART V - DETERMINATION OF INCOME ELIGIBILITY</h2>
+    <!--------------------------------------------------->
+    <p class="help-text">
+<em>Current Federal LIHTC Income Limit * 140%</em>
+For recertifications only. Multiply the current LIHTC Maximum Move-in Income
+Limit by 140% and enter the total. <strong>140% is based on the Federal
+Set-Aside of 20/50 or 40/60 as elected by the owner of the property, not deeper
+targeting elections of 30%, 40%, 45%, 50% etc.</strong>
+Below, indicate wether the household income exceeds that total. If the Gross
+Annual Income at recertification is greater than 140% of the LIHTC Income Limit
+per Family Size at Move-in date (above), then the available unit rule must
+be followed.
+    </p>
+    <div>
+        <div class="col-sm-4">
+            <div class="row">
+                <div class="col-sm-6">
+                    <p>
+TOTAL ANNUAL HOUSEHOLD INCOME FROM ALL SOURCES:<br />
+From item (L) on page 1
+                    </p>
+                </div>
+                <div class="col-sm-6" ng-class="is_eligible({{form.instance.total_annual_income}}) ? 'below-income' : 'above-income'">
+                {{form.instance.total_annual_income|humanize_money}}
+                </div>
+            </div>
+            <div>
+                <p>
+Current Federal LIHTC Income Limit per Family Size:
+[[lihtc_income_limit() | currency]]
+                </p>
+            </div>
+            <div>
+                <p>
+If Applicable, Current Federal Bond Income Limit per Family Size:
+{% if form.instance.lihtc_property.cdlac_number %}
+[[bond_income_limit() | currency]]
+{% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="col-sm-4{% if form.federal_income_restriction.errors %} has-error{% endif %}">
+            <dl>
+                <dt>Unit Meets Federal Income Restriction at</dt>
+                <dd>
+                    <div class="form-group">
+                        <div class="controls">
+                            <label for="federal_income_restriction_60" class="radio-inline">
+                                <input id="federal_income_restriction_60" type="radio"
+                                       {% if form.instance.federal_income_restriction == 60 %}
+                                       checked="checked"
+                                       {% endif %}
+                                       name="federal_income_restriction"
+                                       ng-model="federal_income_restriction" ng-value="60"
+                                       ng-click="federal_income_restriction_other_text = '';" />
+                                60%</label>
+                            <label for="federal_income_restriction_50" class="radio-inline">
+                                <input id="federal_income_restriction_50" type="radio"
+                                       name="federal_income_restriction"
+                                       {% if form.instance.federal_income_restriction == 50 %}
+                                       checked="checked"
+                                       {% endif %}
+                                       ng-model="federal_income_restriction" ng-value="50"
+                                       ng-click="federal_income_restriction_other_text = '';" />
+                                50%</label>
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Unit Meets Deeper Targeting Income Restriction at:</dt>
+                <dd>
+                    <div class="form-group">
+                        <div class="controls">
+                            <label for="federal_income_restriction_other"
+                                   class="radio-inline col-sm-3">
+                                <input id="federal_income_restriction_other"
+                                       type="radio"
+                                       name="federal_income_restriction"
+                                       ng-checked="is_federal_income_restriction_other()"
+                                       ng-model="federal_income_restriction"
+                                       ng-value="federal_income_restriction_other_text" /> Other:
+                            </label>
+                            <div class="input-group col-sm-8">
+                                 <input class="numberinput form-control"
+                                        type="number"
+                                        ng-model="federal_income_restriction_other_text" /><span class="input-group-addon">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+        </div>
+        <div class="col-sm-4">
+            <p>RECERTIFICATION ONLY</p>
+            <dl>
+                <dt>Current Federal LIHTC Income Limit x 140%</dt>
+                <dd>[[lihtc_income_limit() * 140 / 100 | currency]]</dd>
+            </dl>
+            <p>Household Income exceeds 140% at recertification:
+                <i class="fa fa[[is_eligible_140({{form.instance.total_annual_income}}) ? '-check' : '']]-square-o"></i> Yes
+                <i class="fa fa[[!is_eligible_140({{form.instance.total_annual_income}}) ? '-check' : '']]-square-o"></i> No
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div>
+        <div class="col-sm-6">
+            {# XXX Is this suppossed to be inputed by certifier? #}
+            <p>Household Income as of Move-in: {{form.instance.total_annual_income|humanize_money}}</p>
+        </div>
+        <div class="col-sm-6">
+            <p>Household Size at Move-in: {{application.residents.count}}</p>
+        </div>
+    </div>
+</section>
+
+<section id="part-6">
+  <h2>PART VI - RENT</h2>
+  <!--------------------->
+  <div style="display:inline-block;">
+    <div class="col-sm-6">
+        <div>
+            <dl>
+                <dd>
+                    <div class="form-group" id="div_id_monthly_rent">
+                        <label class="control-label requiredField" for="id_monthly_rent">
+                            Tenant Paid Monthly Rent
+                            <span class="asteriskField">
+                                *
+                            </span>
+                        </label>
+                        <div class="controls">
+                            <div class="input-group">
+                                <span class="input-group-addon">$</span>
+                                <input class="numberinput form-control" id="id_monthly_rent" name="monthly_rent" ng-model="monthly_rent" step="any" type="number">
+                            </div>
+                        </div>
+                    </div>
+<p class="help-text">
+Enter the amount tenant pays toward rent (not including rent assistance payments
+such as Section 8).
+</p>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Monthly Utility Allowance</dt>
+                <dd>
+[[utility_allowance() | currency]]
+                </dd>
+            </dl>
+            <dl>
+                <dt>Other Monthly Non-optional charges</dt>
+                <dd>
+[[non_optional_charges() | currency]]
+                </dd>
+            </dl>
+        </div>
+        <div>
+            <dl>
+                <dt>GROSS MONTHLY RENT FOR UNIT
+                    (Tenant paid rent plus Utility Allowance
+                    & other non-optional charges)</dt>
+                <dd class="major" ng-class="is_less_than_rent_limit() ? 'below-income' : 'above-income'">
+[[gross_monthly_rent_for_unit() | currency]]
+                </dd>
+            </dl>
+        </div>
+        <div>
+            <dl>
+                <dt>Maximum Federal LIHTC Rent Limit for this unit:</dt>
+                <dd>[[lihtc_rent_limit() | currency]]</dd>
+            </dl>
+            <dl>
+                <dt>If Applicable, Current Federal &amp; State LIHTC Bond Rent Limit for this unit:</dt>
+                <dd>
+                  {% if form.instance.lihtc_property.cdlac_number %}
+                  [[bond_rent_limit() | currency]]
+                  {% endif %}
+                </dd>
+            </dl>
+            <div class="{% if form.federal_rent_restriction.errors %} has-error{% endif %}">
+            <dl>
+                <dt>Unit Meets Federal Rent Restriction at:</dt>
+                <dd>
+<div class="form-group">
+    <div class="controls">
+        <label for="federal_rent_restriction_60" class="radio-inline">
+            <input id="federal_rent_restriction_60" type="radio"
+                   {% if form.instance.federal_rent_restriction == 60 %}
+                   checked="checked"
+                   {% endif %}
+                   name="federal_rent_restriction"
+                   ng-model="federal_rent_restriction" ng-value="60"
+                   ng-click="federal_rent_restriction_other_text = '';" />
+            60%</label>
+        <label for="federal_rent_restriction_50" class="radio-inline">
+            <input id="federal_rent_restriction_50" type="radio"
+                   {% if form.instance.federal_rent_restriction == 50 %}
+                   checked="checked"
+                   {% endif %}
+                   name="federal_rent_restriction"
+                   ng-model="federal_rent_restriction" ng-value="50"
+                   ng-click="federal_rent_restriction_other_text = '';" />
+            50%</label>
+    </div>
+</div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>If Applicable, Unit Meets Bond Rent Restriction at:</dt>
+                <dd>
+<div class="form-group">
+    <div class="controls">
+        <label for="bond_rent_restriction_60" class="radio-inline">
+            <input id="bond_rent_restriction_60" type="radio"
+                   {% if form.instance.bond_rent_restriction == 60 %}
+                   checked="checked"
+                   {% endif %}
+                   name="bond_rent_restriction"
+                   ng-model="bond_rent_restriction" ng-value="60" />
+            60%</label>
+        <label for="bond_rent_restriction_50" class="radio-inline">
+            <input id="bond_rent_restriction_50" type="radio"
+                   {% if form.instance.bond_rent_restriction == 50 %}
+                   checked="checked"
+                   {% endif %}
+                   name="bond_rent_restriction"
+                   ng-model="bond_rent_restriction" ng-value="50" />
+            50%</label>
+    </div>
+</div>
+                </dd>
+            </dl>
+            <dl>
+                <dt>Unit Meets Deeper Targeting Rent Restriction at:</dt>
+                <dd>
+                    <div class="form-group">
+                        <div class="controls">
+                            <label for="federal_rent_restriction_other"
+                                   class="radio-inline col-sm-2">
+                                <input id="federal_rent_restriction_other"
+                                       type="radio"
+                                       name="federal_rent_restriction"
+                       ng-checked="is_federal_rent_restriction_other()"
+                       ng-model="federal_rent_restriction"
+                       ng-value="federal_rent_restriction_other_text" /> Other:
+                            </label>
+                            <div class="input-group col-sm-6">
+                                <input class="numberinput form-control"
+                                       type="number"
+                                ng-model="federal_rent_restriction_other_text"
+                                /><span class="input-group-addon">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </dd>
+            </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div>
+            <dl>
+                <dd>{% include "bootstrap3/field.html" with field=form.federal_rent_assistance %}</dd>
+                <dd>* Source (* 0-8) {{self.form.instance.rent_assistance_source}}</dd>
+            </dl>
+            <dl>
+                <dd>{% include "bootstrap3/field.html" with field=form.non_federal_rent_assistance %}</dd>
+            </dl>
+            <dl>
+                <dt>Total Monthly Rent Assistance:</dt>
+                <dd>[[total_rent_assistance() | currency]]</dd>
+            </dl>
+        </div>
+        <div>
+            {% include "bootstrap3/field.html" with field=form.rent_assistance_source %}
+            <p>
+** (PBRA) Includes: Section 8 New Construction / Substantial Rehabilitation;
+Section 8 Loan Management; Section 8 Property Disposition; Section 202
+Project Rental Assistance Contracts (PRAC).
+            </p>
+        </div>
+    </div>
+  </div>
+</section>
+
+<section id="part-7">
+    <h2>PART VII - STUDENT STATUS</h2>
+    <!--------------------->
+    <div class="col-sm-4">
+        <p>ARE ALL OCCUPANTS FULL TIME STUDENTS?</p>
+        <div class="row">
+            <div class="col-sm-6">
+                <i class="fa fa{% if form.instance.full_time_student %}-check{% endif %}-square-o"></i> Yes
+            </div>
+            <div class="col-sm-6">
+                <i class="fa fa{% if not form.instance.full_time_student %}-check{% endif %}-square-o"></i> No
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <p>
+If yes, Enter student explanation*
+(also attach documentation)
+        </p>
+        <p>
+            Enter 1-5: {{form.instance.student_explanation|humanize_list}}
+        </p>
+    </div>
+    <div class="col-sm-4">
+        <p>* Student Explanation
+            <ol>
+                <li>AFDC / TANF Assistance</li>
+                <li>Job Training Program</li>
+                <li>Single Parent / Dependent Child</li>
+                <li>Married / Joint Return</li>
+                <li>Former Foster Care</li>
+            </ol>
+        </p>
+    </div>
+</section>
+
+ <section id="part-8">
+    <h2>PART VIII - PROGRAM TYPE</h2>
+    <!------------------------------->
+    <p>
+Mark the program(s) listed below (a. through e.) for which this household's unit
+will be counted toward the property's occupancy requirements. Under each program
+marked, indicate the household's income status as established by this
+certification/recertification.
+    </p>
+    <div class="row{% if form.program_tax_credit.errors or form.program_home.errors or form.program_tax_exempt.errors or form.program_ahdp.errors or form.program_other.errors %} has-error{% endif %}">
+        <div class="col-sm-2">
+{% include "bootstrap3/field.html" with field=form.program_tax_credit %}
+            <p>See Part V above.</p>
+        </div>
+        <!-- XXX AMGI Average Monthly Gross Income? -->
+        <div class="col-sm-2">
+          <div class="form-group">
+            <div class="checkbox" id="div_id_program_home">
+              <label for="id_program_home">
+                <input class="checkboxinput" id="id_program_home" name="program_home" type="checkbox" ng-model="application.program_home">
+                b. HOME
+              </label>
+            </div>
+          </div>
+          <div>Income Status
+            <ul id="id_program_home_rate" class="list-unstyled{% if form.program_home_rate.errors %} has-error{% endif %}">
+              <li>
+                <label for="program_home_rate_50" class="radio-inline">
+                  <input id="program_home_rate_50" type="radio"
+       {% if form.instance.program_home_rate == 50 %}checked="checked"{% endif %}
+       name="program_home_rate" value="50" ng-disabled="!application.program_home" />&le; 50% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_home_rate_60" class="radio-inline">
+                  <input id="program_home_rate_60" type="radio"
+       {% if form.instance.program_home_rate == 60 %}checked="checked"{% endif %}
+       name="program_home_rate" value="60" ng-disabled="!application.program_home" />&le; 60% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_home_rate_80" class="radio-inline">
+                  <input id="program_home_rate_80" type="radio"
+       {% if form.instance.program_home_rate == 80 %}checked="checked"{% endif %}
+       name="program_home_rate" value="80" ng-disabled="!application.program_home" />&le; 80% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_home_rate_OI" class="radio-inline">
+<input id="program_home_rate_OI" type="radio"
+       {% if form.instance.program_home_rate > 80 %}checked="checked"{% endif %}
+       name="program_home_rate" value="100" ng-disabled="!application.program_home" />OI**
+                </label>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+            <div class="checkbox" id="div_id_program_tax_exempt">
+              <label for="id_program_tax_exempt">
+                <input class="checkboxinput" id="id_program_tax_exempt" name="program_tax_exempt" type="checkbox" ng-model="application.program_tax_exempt">
+                c. Tax Exempt
+              </label>
+            </div>
+          </div>
+          <div>Income Status
+            <ul id="id_program_tax_exempt_rate" class="list-unstyled{% if form.program_tax_exempt_rate.errors %} has-error{% endif %}">
+              <li>
+                <label for="program_tax_exempt_rate_50" class="radio-inline">
+                  <input id="program_tax_exempt_rate_50" type="radio"
+       {% if form.instance.program_tax_exempt_rate == 50 %}checked="checked"{% endif %}
+       name="program_tax_exempt_rate" value="50" ng-disabled="!application.program_tax_exempt" />50% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_tax_exempt_rate_60" class="radio-inline">
+                  <input id="program_tax_exempt_rate_60" type="radio"
+       {% if form.instance.program_tax_exempt_rate == 60 %}checked="checked"{% endif %}
+       name="program_tax_exempt_rate" value="60" ng-disabled="!application.program_tax_exempt" />60% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_tax_exempt_rate_80" class="radio-inline">
+                  <input id="program_tax_exempt_rate_80" type="radio"
+       {% if form.instance.program_tax_exempt_rate == 80 %}checked="checked"{% endif %}
+       name="program_tax_exempt_rate" value="80" ng-disabled="!application.program_tax_exempt" />80% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_tax_exempt_rate_OI" class="radio-inline">
+                  <input id="program_tax_exempt_rate_OI" type="radio"
+       {% if form.instance.program_tax_exempt_rate > 80 %}checked="checked"{% endif %}
+       name="program_tax_exempt_rate" value="100" ng-disabled="!application.program_tax_exempt" />OI**
+                </label>
+              </li>
+            </ul>
+            {% for error in form.program_tax_exempt_rate.errors %}
+            <p class="help-block"><strong>{{ error }}</strong></p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+            <div class="checkbox" id="div_id_program_ahdp">
+              <label for="id_program_ahdp">
+                <input class="checkboxinput" id="id_program_ahdp" name="program_ahdp" type="checkbox" ng-model="application.program_ahdp">
+                d. AHDP
+              </label>
+            </div>
+          </div>
+          <div>Income Status
+            <ul id="id_program_ahdp_rate" class="list-unstyled{% if form.program_ahdp_rate.errors %} has-error{% endif %}">
+              <li>
+                <label for="program_ahdp_rate_50" class="radio-inline">
+                  <input id="program_ahdp_rate_50" type="radio"
+       {% if form.instance.program_ahdp_rate == 50 %}checked="checked"{% endif %}
+       name="program_ahdp_rate" value="50" ng-disabled="!application.program_ahdp" />50% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_ahdp_rate_80" class="radio-inline">
+                  <input id="program_ahdp_rate_80" type="radio"
+       {% if form.instance.program_ahdp_rate == 80 %}checked="checked"{% endif %}
+       name="program_ahdp_rate" value="80" ng-disabled="!application.program_ahdp" />80% AMGI
+                </label>
+              </li>
+              <li>
+                <label for="program_ahdp_rate_OI" class="radio-inline">
+                  <input id="program_ahdp_rate_OI" type="radio"
+       {% if form.instance.program_ahdp_rate > 80 %}checked="checked"{% endif %}
+       name="program_ahdp_rate" value="100" ng-disabled="!application.program_ahdp" />
+                  OI**
+                </label>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="checkbox" id="div_id_program_other">
+            <label for="id_program_other">
+              <input class="checkboxinput" id="id_program_other" name="program_other" type="checkbox" ng-model="application.program_other">
+              e. Other
+            </label>
+          </div>
+          <div>Income Status
+            <ul id="id_program_other_rate" class="list-unstyled{% if form.program_other_rate.errors %} has-error{% endif %}">
+              <li>
+                <label for="program_other_rate_50" class="radio-inline">
+                  <input id="program_other_rate_50" type="radio"
+       {% if form.instance.program_other_rate == 50 %}checked="checked"{% endif %}
+       name="program_other_rate" value="50" ng-disabled="!application.program_other" />
+<input class="numberinput form-control"
+       type="number"
+       name="program_other_rate" value="" ng-disabled="!application.program_other">
+                </label>
+              </li>
+              <li>
+                <label for="program_other_rate_OI" class="radio-inline">
+                  <input id="program_other_rate_OI" type="radio"
+       {% if form.instance.program_other_rate > 80 %}checked="checked"{% endif %}
+name="program_other_rate" value="100" ng-disabled="!application.program_other" />OI**
+                </label>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </div>
+    <p>
+** Upon recertification, household was determined over-income (OI) according
+to eligibility requirements of the program(s) marked above.
+    </p>
+</section>
+
+<section id="signature-owner">
+    <h2>SIGNATURE OF OWNER/REPRESENTATIVE</h2>
+    <!---------------------------------------->
+    <p>
+Based on the representations herein and upon the proof and documentation
+required to be submitted, the individual(s) named in Part II of this Tenant
+Income Certification is/are eligible under the provisions of Section 42
+of the Internal Revenue Code, as amended, and the Land Use Restriction
+Agreement (if applicable), to live in a unit in this Project.
+    </p>
+    <div>
+        <dl>
+            <dt>Signature</dt>
+            <dd></dd>
+        </dl>
+        <dl>
+            <dt>Date</dt>
+            <dd></dd>
+        </dl>
+    </div>
+</section>
+
+<section id="part-9">
+    <h2>PART IX - SUPPLEMENTAL INFORMATION FORM</h2>
+    <!---------------------------------------------->
+    <p class="help-text">
+        <strong>Complete this portion of the form at move-in and at recertification's (only if the household composition has changed from the previous year's certification).</strong>
+    </p>
+    <p>
+The California Tax Credit Allocation Committe (CTCAC) requests the following
+information in order to comply with the Housing and Economic Recovery Act
+(HERA) of 2008, which requires all Low Income Housing Tax Credit (LIHTC)
+properties to collect and submit to the U.S. Department of Housing and
+Urban Development (HUD), certain demographic and economic information
+on tenants residing in LIHTC financed properties. Although the CTCAC
+would appreciate receiving this information, you may choose
+not to furnish it. You will not be discriminated against on the basis
+of this information, or on whether or not you choose to furnish it.
+If you do not wish to furnish this information, please check the box
+at the bottom of the page and initial.
+    </p>
+    <p>
+Enter both Ethnicity and Race codes for each household member (see below
+for codes).
+    </p>
+    <table class="table">
+        <tr>
+            <th colspan="7">TENANT DEMOGRAPHIC PROFILE</th>
+        </tr>
+        <tr>
+            <th>HH Mbr#</th>
+            <th>Last Name</th>
+            <th>First Name</th>
+            <th>Middle Initial</th>
+            <th>Race</th>
+            <th>Ethnicity</th>
+            <th>Disabled</th>
+        </tr>
+        {% for applicant in application.residents %}
+        <tr>
+            <td><a href="{% url 'demographic_profile' application.lihtc_property applicant.resident %}">{{forloop.counter}}</a></td>
+            <td>{{applicant.resident.last_name}}</td>
+            <td>{{applicant.resident.first_name}}</td>
+            <td>{{applicant.resident.middle_initial}}</td>
+            <td>{{applicant.resident.race_code}}</td>
+            <td>{{applicant.resident.ethnicity}}</td>
+            <td>{{applicant.resident.disabled}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div>
+        <h3>The Following Race Codes should be used:</h3>
+        <ol>
+            <li>White - A person having origins in any of the original people of Europe, the Middle East or North Africa.</li>
+            <li>Black / African American - A person having origins in any of the black racial groups of Africa. Terms such as "Haitian" or "Negro" apply to this category.</li>
+            <li>American Indian / Alaska Native - A person having origins in any of the original peoples of North and Soutth America (including Central America), and who maintain tribal affiliation or community attachement.</li>
+            <li>Asian - A person having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent:
+              <div class="col-sm-4">
+                <ul>
+                  <li>4a - Asian India</li>
+                  <li>4b - Chinese</li>
+                  <li>4c - Filipino</li>
+                  <li>4d - Japanese</li>
+                </ul>
+              </div>
+              <div class="col-sm-4">
+                <ul>
+                  <li>4e - Korean</li>
+                  <li>4b - Vietnamese</li>
+                  <li>4c - Other Asian</li>
+                </ul>
+              </div>
+            </li>
+            <li>Native Hawaiian / Other Pacific Islander - A person having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands:
+              <div class="col-sm-4">
+                <ul>
+                  <li>5a - Native Hawaiian</li>
+                  <li>5b - Guamanian or Chamorro</li>
+                </ul>
+              </div>
+              <div class="col-sm-4">
+                <ul>
+                  <li>5c - Samoan</li>
+                  <li>5d - Other Pacific Islander</li>
+                </ul>
+              </div>
+            </li>
+            <li>Other</li>
+            <li>Did not respond. <strong>(Please initial below)</strong></li>
+        </ol>
+        <p>
+<em>Note: Multiple racial categories may be indicated as such: 31 – American Indian/Alaska Native & White, 14b - White & Asian (Chinese), etc.</em>
+        </p>
+    </div>
+    <div>
+        <h3>The Following Ethnicity Codes should be used:</h3>
+        <ol>
+            <li>Hispanic - A person of Cuban, Mexican, Puerto Rican, South or Central American, or other Spanish culture or origin, regardless of race. Terms such as "Latino" or "Spansh Origin" apply to this category</li>
+            <li>Not Hispanic - A person not of Cuban, Mexican, Puerto Rican, South or Central American, or other Spanish culture or origin, regardless of race.</li>
+            <li>Did not respond. <strong>(Please initial below)</strong></li>
+        </ol>
+    </div>
+    <div>
+        <h3>Disability Status:</h3>
+        <ol>
+            <li>Yes
+                <p>If any member of the household is disabled according to Fair Housing Act definition for handicap (disability):
+                    <ul>
+                        <li>A physical or mental impairment which substantially limits one or more major life activities; a record of such impairment or being regarded as having such impairment. For a definition of "physical or mental impairment" and other terms used, please see 24 CFR 100.201, available at <a target="_blank" href="http://www.fairhousing.com/index.cfm?method=page.display&pageID=465">http://www.fairhousing.com/index.cfm?method=page.display&pageID=465</a></li>
+                        <li>"Handicap" does not include current, illegal use of or addiction to a controlled substance.</li>
+                        <li>An individual shall not be considered to have a handicap solely because that individual is a transvestite.</li>
+                    </ul>
+                </p>
+            </li>
+            <li>No</li>
+            <li>Did not respond. <strong>(Please initial below)</strong></li>
+        </ol>
+    </div>
+</section>
+{% endwith %}
+    <div class="form-actions text-center">
+        <button id="update-tic" class="btn btn-primary btn-lg" type="submit" name="submit" value="Update">Update</button>
+    </div>
+</form>
+</div>
+{% endblock %}
+
+
+{% block bodyscripts %}
+{% assets "js_angular" %}
+<script type="text/javascript" src="{{ASSET_URL}}"></script>
+{% endassets %}
+{% assets "js_tcapp" %}
+<script type="text/javascript" src="{{ASSET_URL}}"></script>
+{% endassets %}
+<script type="text/javascript">
+/* Implementation Note: Not including a list of dependent modules
+   (2nd parameter to `module`) "re-opens" the module for additional
+   configuration. */
+var app = angular.module('tcappApp');
+/* Add the CSRF Token: */
+app.config(['$interpolateProvider', '$httpProvider',
+           function($interpolateProvider, $httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{csrf_token|escapejs}}';
+    /* Makes it easier to separate between django and angularjs templates */
+    $interpolateProvider.startSymbol('[[');
+    $interpolateProvider.endSymbol(']]');
+}]);
+app.constant("settings", {
+    limits: {{limits|safe}},
+    application: {
+        program_tax_credit: {% if form.instance.program_tax_credit %}true{% else %}false{% endif %},
+        program_home: {% if form.instance.program_home %}true{% else %}false{% endif %},
+        program_tax_exempt: {% if form.instance.program_tax_exempt %}true{% else %}false{% endif %},
+        program_ahdp: {% if form.instance.program_ahdp %}true{% else %}false{% endif %},
+        program_other: {% if form.instance.program_other %}true{% else %}false{% endif %}
+    },
+    fields: {
+     effective_date: "{{form.instance.effective_date|date:'Y-m-d'}}",
+     move_in_date: "{{form.instance.move_in_date|date:'Y-m-d'}}",
+     nb_bedrooms: {% if form.instance.nb_bedrooms %}{{form.instance.nb_bedrooms}}{% else %}""{% endif %},
+     federal_income_restriction: {{form.instance.federal_income_restriction}},
+     federal_rent_restriction: {{form.instance.federal_rent_restriction}},
+     federal_rent_assistance: {{form.instance.federal_rent_assistance}},
+     non_federal_rent_assistance: {{form.instance.non_federal_rent_assistance}},
+     monthly_rent: {{form.instance.monthly_rent}} },
+});
+app.constant("income", {});
+</script>
+{% endblock %}
+

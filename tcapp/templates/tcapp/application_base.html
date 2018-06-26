@@ -1,0 +1,11 @@
+{% extends "tcapp/base.html" %}
+
+{% block tcapp_content %}
+{% include "tcapp/_application_breadcrumb.html" %}
+<div class="container">
+    <div class="row">
+        {% block application_content %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block localheader %}
+<link href="//fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<style>
+.atheading{
+  color: #555;
+}
+.leaderboard {
+  padding-top: 25px;
+  padding-bottom: 50px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="leaderboard">
+    <div class="call-to-action">
+        <div class="find-property" style="background: url({{'/static/img/la-panoramic-2680x600.jpg'|asset}}) no-repeat center center;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;padding-top: 45px;padding-bottom: 70px;">
+            <div class="container text-center">
+                <h1 style="color:#eee;">INCOME CERTIFICATION RENOVATED</h1>
+                <div class="header-block">
+                    <form method="get" action="{{'/projects/'|site_prefixed}}" style="padding: 15px;">
+                        <div class="input-group">
+                            <input class="form-control input-lg" maxlength="13" name="q" placeholder="Find your LIHTC property..." type="text">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary btn-lg" type="submit">Search &raquo;</button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="text-section">
+    <div>
+        <div class="container">
+            <div class="row leaderboard">
+                <h2><i class="fa fa-calendar"></i> MAX RENTS, MAX INCOMES</h2>
+                <div class="col-sm-6">
+                    <h3 class="atheading">@YOUR MONITOR</h3>
+                    <p class="lead-para">
+Find income and rent limits that apply to your property.
+TeaCapp calculates your rent limits net of Utility Allowances.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <img class="img-responsive" src="{{'/static/img/max-rents.png'|asset}}">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="highlight">
+        <div class="container">
+            <div class="row leaderboard">
+                <h2><i class="fa fa-user"></i>  TIC - QUESTIONNAIRES</h2>
+                <div class="col-sm-6">
+                    <h3 class="atheading">@YOUR INBOX</h3>
+                    <p class="lead-para">
+Send a link to prospective tenants so they can apply online.
+Automatically see who might qualify.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <img class="img-responsive" src="{{'/static/img/ticq.png'|asset}}">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="container">
+            <div class="row leaderboard">
+                <h2><i class="fa fa-archive"></i> COMPLETE CLOUD RECORDS</h2>
+                <div class="col-sm-6">
+                    <h3 class="atheading">@YOUR FINGERTIPS</h3>
+                    <p class="lead-para">
+Go through audits with confidence. TeaCapp securely retains easy to print backup for compliance requirements.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <img class="img-responsive" src="{{'/static/img/im-vault.jpg'|asset}}">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="highlight">
+        <div class="container">
+            <div class="row leaderboard">
+                <h2><i class="fa fa-home"></i> READY-TO-SIGN CERTIFICATION FORMS</h2>
+                <div class="col-sm-6">
+                    <h3 class="atheading">@YOUR PRINTER</h3>
+                    <p class="lead-para">
+Put away your calculator. Move in Tax Credit Compliant households in no time.
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <img class="img-responsive" src="{{'/static/img/income-verification.png'|asset}}">
+                </div>
+            </div>
+            <div class="leaderboard text-center">
+                <a class="btn btn-primary btn-lg" href="{{'/contact/'|site_prefixed}}">Contact Sales</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

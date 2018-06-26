@@ -1,0 +1,295 @@
+{% extends "tcapp/project/index.html" %}
+{% load assets %}
+
+{% block content %}
+<div class="highlight text-center row" style="padding-bottom: 25px;">
+    <div class="col-sm-12">
+        <h2>Are you a property manager for {{object.name}}?</h2>
+        <p>
+            Register and start using TeaCapp to certify LIHTC tenants now.
+        </p>
+        <div>
+            <a class="btn btn-primary btn-lg" href="{{'/register/'|site_prefixed}}">Register</a>
+        </div>
+    </div>
+</div>
+<div class="container">
+<div class="row">
+    <div class="col-sm-6">
+        <h3>{{object.name}}</h3>
+        <dl class="dl-horizontal">
+            <dt>TCAC Number</dt>
+            <dd>{{object.tcac_number}}</dd>
+            {% if is_manager %}
+            <dd>
+            <a href="{{''|site_prefixed}}/profile/{{object.slug}}/roles/managers/">Add Managers</a>
+            </dd>
+            {% endif %}
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>County</dt>
+            <dd>{{object.county}}</dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>Street Address</dt>
+            <dd>
+                <span class="adr">
+                    <span class="street-address">{{object.street_address}}</span><br />
+                    <span class="locality">{{object.locality}}</span><br />
+                    <abbr class="region" title="{{object.county.region}}">{{object.county.region}}</abbr>
+                    <span class="postal-code">{{object.postal_code}}</span><br />
+                    <span class="country-name">{{object.country.name}}</span>
+                </span>
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>Phone</dt>
+            <dd>{{object.phone}}</dd>
+        </dl>
+        <hr />
+        <div>
+            <dl class="dl-horizontal">
+                <dt>Application Stage</dt>
+                <dd>{{object.get_application_stage_display}}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Placed in Service</dt>
+                <dd>{{object.placed_in_service|date}}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Last Building</dt>
+                <dd>{{object.last_building|date}}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Total Units</dt>
+                <dd>{{object.total_units}}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Low Income Units</dt>
+                <dd>{{object.low_income_units}}</dd>
+            </dl>
+            <!--
+                <dl class="dl-horizontal">
+                    <dt>BIN Number</dt>
+                    <dd>{{object.bin_number}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Tax Credit Funding</dt>
+                    <dd>{{object.tax_credit_funding}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Assemby District</dt>
+                    <dd>{{object.assembly_district}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Senate District</dt>
+                    <dd>{{object.senate_district}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Federal Congressional District</dt>
+                    <dd>{{object.federal_congressional_district}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Census Tract</dt>
+                    <dd>{{object.census_tract}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Assessor Parcel Number</dt>
+                    <dd>{{object.assessor_parcel_number}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Construction Type</dt>
+                    <dd>{{object.construction_type}}</dd>
+                </dl>
+                <dl class="dl-horizontal">
+                    <dt>Housing Type</dt>
+                    <dd>{{object.housing_type}}</dd>
+                </dl>
+                -->
+        </div>
+    </div>
+    <div class="col-sm-6">
+        {% for percent, limit in limits.items %}
+        <div id="percent-{{percent}}" class="row">
+            <h3>{{percent}}% Limits</h3>
+            <div class="col-sm-6">
+                <dl>
+                    <dt>Income Limits</dt>
+                    <dd>
+                        <table class="table">
+                            <tr>
+                                <th>Nb Persons</th>
+                                <th>{{percent}}% Level</th>
+                            </tr>
+                            {% for income_limit in limit.income %}
+                            <tr>
+                                <td>{{income_limit.0}}</td>
+                                <td class="text-right">{{income_limit.1|humanize_dollars}}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-sm-6">
+                <dl>
+                    <dt>Rent Limits</dt>
+                    <dd>
+                        <table class="table">
+                            <tr>
+                                <th>Nb Bedrooms</th>
+                                <th>{{percent}}% Level</th>
+                            </tr>
+                            {% for rent_limit in limit.rent %}
+                            <tr>
+                                <td>{{rent_limit.0}}</td>
+                                <td class="text-right">{{rent_limit.1|humanize_dollars}}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="text-right"><em>Effective {{object.county.current_effective_date|date:"m/d/Y"}}</em></div>
+    </div>
+</div>
+<div class="row text-center">
+    <div class="col-sm-offset-4 col-sm-4" style="font-size: 1.2em;margin-bottom: 25px;">
+        <a class="btn btn-primary btn-lg" href="#"
+           data-toggle="modal" data-target="#new-request"><i class="fa fa-phone"></i> Contact us</a>
+    </div>
+</div>
+<div class="row text-center" style="margin: 50px 0;">
+    <p>
+Share the following link with your prospective tenants and start pre-screening
+who might qualify for LIHTC units.
+    </p>
+    <a href="{{application_url}}">{{application_url}}</a>
+</div>
+</div>
+<!-- modal dialog to request a Contact us -->
+<div id="new-request" class="modal fade"
+     tabindex="-1" role="dialog"
+     aria-labelledby="Contact us" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close"
+                data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Contact us ...</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-4">
+                    <label>Email</label>
+                </div>
+                <div class="controls col-sm-8">
+                    <input id="new-request-email" type="text" max-length="150" placeholder="me@example.com" style="width:100%;" autofocus ></input>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4">
+                    <label>Phone</label>
+                </div>
+                <div class="controls col-sm-8">
+                    <input id="new-request-phone" type="text" max-length="15" placeholder="000-000-0000"  style="width:100%;"></input>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <label>The following message will be sent along your request:</label>
+                    <div class="controls">
+                        <textarea id="new-request-body" class="form-control"
+                                  name="message"
+                                  maxlength="255" type="text" rows="10">
+Hello,
+
+I would like to use TeaCapp for my LIHTC project. My project number is {{object.tcac_number}}.
+
+Best times to call me are:
+ - Monday mornings
+ - Wednesday afternoons
+
+Thank you,
+Property Manager of {{object.name}}.
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default"
+                data-dismiss="modal">Cancel</button>
+        <button id="new-request-submit"
+                type="button" class="btn btn-primary"
+                data-dismiss="modal">Submit Request</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- end of modal dialog -->
+{% endblock %}
+{% block bodyscripts %}
+<script type="text/javascript">
+function showMessages(messages, style) {
+    if( typeof toastr !== 'undefined' ) {
+        for( var i = 0; i < messages.length; ++i ) {
+            toastr[style](messages[i]);
+        }
+    } else {
+        var messageBlock = "<div class=\"alert alert-block";
+        if( style ) {
+            messageBlock += " alert-" + style;
+        }
+        messageBlock += "\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>";
+
+        for( var i = 0; i < messages.length; ++i ) {
+            messageBlock += "<p>" + messages[i] + "</p>";
+        }
+        messageBlock += "</div>";
+        $("#messages").removeClass("hidden");
+        $("#messages-content").append(messageBlock);
+        $("html, body").animate({
+            // scrollTop: $("#messages").offset().top - 50
+            // avoid weird animation when messages at the top:
+            scrollTop: $("body").offset().top
+        }, 500);
+    }
+}
+
+$(document).ready(function() {
+  $("#new-request").on('shown.bs.modal', function () {
+    $("#new-request-email").focus();
+  });
+  $("#new-request-submit").click(function(event) {
+      var email = $("#new-request-email").val();
+      var phone = $("#new-request-phone").val();
+      var body = $("#new-request-body").val();
+      $.ajax({type: "POST",
+          url: "{% url 'api_request_demo' object %}",
+          data: JSON.stringify({
+                     "email": email,
+                     "phone": phone,
+                     "body": body}),
+          dataType: "json",
+          contentType: "application/json; charset=utf-8",
+          success: function(data) {
+               showMessages(
+["Thank you! We will be sure to contact you within 24 hours."], "success");
+          },
+          error: function(data) {
+              showMessages(["An error occurred (" +
+                  data.status + " " + data.statusText +
+              "). Please accept our apologies."], "error");
+          }
+      });
+  });
+});
+</script>
+{% endblock %}
+
